@@ -115,8 +115,8 @@ function template_TrackerHome()
 	<div class="windowbg', $windowbg == 0 ? '' : '2', '">
 		<span class="topslice"><span></span></span>
 		<div class="info" style="margin-left: 10px">
-			<a class="subject" href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $id, '">
-				', $project['name'], '
+			<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $id, '">
+				<span class="projsubject">', $project['name'], '</span>
 			</a> - ', sprintf($txt['issues'], $project['num']['issues']), ', ', sprintf($txt['features'], $project['num']['features']), '<br />
 			', $project['description'], '
 		</div>
@@ -136,7 +136,7 @@ function template_TrackerHome()
 	// Show the items requiring attention.
 	if (count($context['bugtracker']['attention']) != 0)
 	{
-		// Headers.
+		// Headers. Just headers.
 		echo '
 	<div class="tborder topic_table">
 		<table class="table_grid" cellspacing="0" style="width: 100%">
@@ -162,14 +162,24 @@ function template_TrackerHome()
 		// And the content.
 		foreach ($context['bugtracker']['attention'] as $entry)
 		{
+			// Hi! Welcome at entry statio-- oh, we aren't recording?
 			echo '
-				<tr>
+				<tr>';
+				
+			// Show a nice image depending on the type.
+			echo '
 					<td class="icon1 windowbg">
 						<img src="', $settings['images_url'], '/bugtracker/', $entry['type'], '.png" alt="" />
-					</td>
+					</td>';
+					
+			// And on the status!
+			echo '
 					<td class="icon2 windowbg">
 						<img src="' . $settings['images_url'] . '/bugtracker/', $entry['status'] == 'wip' ? 'wip.gif' : $entry['status'] . '.png', '" alt="" />
-					</td>
+					</td>';
+					
+			// Then on to the entry title and short description.
+			echo '
 					<td class="subject windowbg2">
 						<div>
 							<span>
@@ -179,16 +189,28 @@ function template_TrackerHome()
 							</span>
 							<p>', $entry['shortdesc'], '</p>
 						</div>
-					</td>
+					</td>';
+					
+			// The status...
+			echo '
 					<td class="stats windowbg">
 						<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $entry['status'], '">', $txt['status_' . $entry['status']], '</a>
-					</td>
+					</td>';
+			
+			// Type?
+			echo '
 					<td class="stats windowbg2">
 						<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $entry['type'], '">', $txt['bugtracker_' . $entry['type']], '</a>
-					</td>
+					</td>';
+			
+			// And project!
+			echo '
 					<td class="stats windowbg">
 						', !empty($entry['project']) ? '<a href="' . $scripturl . '?action=bugtracker;sa=viewproject;project=' . $entry['project']['id'] . '">' . $entry['project']['name'] . '</a>' : $txt['na'], '
-					</td>
+					</td>';
+					
+			// Close this entry -- up to the next!
+			echo '
 				</tr>';
 		}
 		echo '
@@ -227,13 +249,17 @@ function template_TrackerView()
 		echo '
 	<div class="information"><strong>', $txt['entry_added'], '</strong></div>';
 
+	// Show some information about this entry.
 	echo '
 	<div class="cat_bar">
 		<h3 class="catbg">
 			<img class="icon" src="', $settings['images_url'], '/bugtracker/', $context['bugtracker']['entry']['type'], '.png" alt="" />
 			', sprintf($txt['entrytitle'], $context['bugtracker']['entry']['id'], $context['bugtracker']['entry']['name']), '
 		</h3>
-	</div>
+	</div>';
+	
+	// As we don't have any comments yet... Remove this link!
+	/*
 	<div class="buttonlist floatleft">
 		<ul>
 			<li>
@@ -242,12 +268,14 @@ function template_TrackerView()
 				</a>
 			</li>
 		</ul>
-	</div>
+	</div>*/
+	
+	echo '
 	<div class="buttonlist floatright">
 		<ul>';
 
-	// Are we allowed to reply to this entry?
-	if ($context['can_bt_reply_any'] || $context['can_bt_reply_own'])
+	// Are we allowed to reply to this entry? Remove the "false" check on here to make the button appear like normal, done like this because comments haven't been implemented yet.
+	if (false || $context['can_bt_reply_any'] || $context['can_bt_reply_own'])
 		echo '
 			<li>
 				<a class="active" href="', $scripturl, '?action=bugtracker;sa=reply;entry=', $context['bugtracker']['entry']['id'], '"><span>', $txt['reply'], '</span></a>
@@ -285,10 +313,15 @@ function template_TrackerView()
 			<td style="width: 95%">
 				<div class="plainbox">
 					', $context['bugtracker']['entry']['name'], '<br />
-					', $txt['bugtracker_' . $context['bugtracker']['entry']['type']], '<br />
+
+					<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $context['bugtracker']['entry']['type'], '">', $txt['bugtracker_' . $context['bugtracker']['entry']['type']], '</a><br />
+
 					<a style="color:', $context['bugtracker']['entry']['tracker']['member_group_color'], '" href="', $scripturl, '?action=profile;u=', $context['bugtracker']['entry']['tracker']['id_member'], '">', $context['bugtracker']['entry']['tracker']['member_name'], '</a> (', $context['bugtracker']['entry']['tracker']['member_group'], ')<br />
-					', $txt['status_' . $context['bugtracker']['entry']['status']] . ($context['bugtracker']['entry']['attention'] ? ' <strong>(' . $txt['status_attention'] . ')</strong>' : ''), '<br />
+
+					<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $context['bugtracker']['entry']['status'], '">', $txt['status_' . $context['bugtracker']['entry']['status']] . '</a>' . ($context['bugtracker']['entry']['attention'] ? ' <strong>(' . $txt['status_attention'] . ')</strong>' : ''), '<br />
+
 					<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $context['bugtracker']['entry']['project']['id'], '">', $context['bugtracker']['entry']['project']['name'], '</a><br />
+
 					', $context['bugtracker']['entry']['status'] == 'wip' ? $context['bugtracker']['entry']['progress'] . '<br />' : '', '
 				</div>
 			</td>
@@ -401,15 +434,33 @@ function template_BugTrackerAddNew()
 					</td>
 				</tr>';
 
+	// A lil' space. Then some text.
+
+	// To what should we mark this?
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<select name="entry_mark">
+							<option value="new" selected="selected">', $txt['entry_mark_optional'], '</option>
+							<option value="new">', $txt['mark_new'], '</option>
+							<option value="wip">', $txt['mark_wip'], '</option>
+							<option value="done">', $txt['mark_done'], '</option>
+							<option value="reject">', $txt['mark_reject'], '</option>
+						</select>
+					</td>
+				</tr>';
+
 	// What kind of thing is this? Set the type, please.
 	echo '
 				<tr>
+					<td class="halfwidth"></td>
 					<td class="halfwidth">
-						<strong>', $txt['type'], '</strong>
-					</td>
-					<td class="halfwidth">
-						<input type="radio" name="entry_type" value="issue" /> ', $txt['bugtracker_issue'], '
-						<input type="radio" name="entry_type" value="feature" /> ', $txt['bugtracker_feature'], '
+						<select name="entry_type">
+							<option value="" disabled="disabled" selected="selected">', $txt['type'], '</option>
+							<option value="issue">', $txt['bugtracker_issue'], '</option>
+							<option value="feature">', $txt['bugtracker_feature'], '</option>
+						</select>
 					</td>
 				</tr>';
 	
@@ -419,6 +470,36 @@ function template_BugTrackerAddNew()
 					<td class="halfwidth"></td>
 					<td class="halfwidth">
 						<input type="checkbox" name="entry_private" value="true" /> ', $txt['entry_private'], '
+					</td>
+				</tr>';
+
+	// Or does it need attention?
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<input type="checkbox" name="entry_attention" value="true" /> ', $txt['mark_attention'], '
+					</td>
+				</tr>';
+				
+	// Gotta change the progress?
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<select name="entry_progress">
+							<option value="0" selected="selected">', $txt['entry_progress_optional'], '</option>';
+							
+	// Do it this way, since that is *quite* a bit quicker.
+	$progvalues = array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
+	foreach ($progvalues as $prog)
+	{
+		echo '
+							<option value="', $prog, '">', $prog, '%</option>';
+	}
+	
+	echo '
+						</select>
 					</td>
 				</tr>';
 
@@ -433,15 +514,7 @@ function template_BugTrackerAddNew()
 			', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message') . '<br /><hr />';
 
 	// Some users need extra choice.
-	echo '
-			', $txt['entry_mark_optional'], '<br />
-			<input type="radio" name="entry_mark" value="new" checked="checked" /> ', $txt['mark_new'], '<br />
-			<input type="radio" name="entry_mark" value="wip" /> ', $txt['mark_wip'], '<br />
-			<input type="radio" name="entry_mark" value="done" /> ', $txt['mark_done'], '<br />
-			<input type="radio" name="entry_mark" value="reject" /> ', $txt['mark_reject'], '<br />
-			<input type="checkbox" name="entry_attention" value="true" /> ', $txt['mark_attention'], '<br /><br />
-
-			', sprintf($txt['entry_posted_in'], $context['bugtracker']['project']['name']);
+	echo sprintf($txt['entry_posted_in'], $context['bugtracker']['project']['name']);
 
 	// Some hidden stuff.
 	echo '
@@ -453,6 +526,141 @@ function template_BugTrackerAddNew()
 			<div class="floatright" style="margin-right:10px">
 				<input type="submit" value="', $txt['entry_submit'], '" class="button_submit" />
 			</div>
+		</div>		
+		<span class="botslice"><span></span></span>
+	</div>';
+
+	// Close the form.
+	echo '
+	</form>';
+
+	// Because content will break otherwise.
+	echo '
+	<br class="clear" />';
+}
+
+function template_BugTrackerEdit()
+{
+	// Globalling.
+	global $context, $scripturl, $txt;
+
+	// Types a bit quicker.
+	$entry = $context['bugtracker']['entry'];
+
+	// Start our form.
+	echo '
+	<form action="', $scripturl, '?action=bugtracker;sa=edit2" method="post">';
+
+	// Then, for the general information.
+	echo '
+	<div class="cat_bar">
+		<h3 class="catbg">
+			', $txt['entry_edit'], '
+		</h3>
+	</div>
+	<div class="windowbg">
+		<span class="topslice"><span></span></span>
+		<div style="margin-left:10px">
+			<table class="fullwidth">';
+
+	// The entry title. Lets start with that.
+	echo '
+				<tr>
+					<td class="halfwidth">
+						<strong>', $txt['title'], '</strong>
+					</td>
+					<td class="halfwidth">
+						<input type="text" style="width: 98%" name="entry_title" value="', $entry['name'], '" />
+					</td>
+				</tr>';
+
+	// To what should we mark this?
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<select name="entry_mark">
+							<option value="new"', ($entry['status'] == 'new' ? ' selected="selected"' : ''), '>', $txt['mark_new'], '</option>
+							<option value="wip"', ($entry['status'] == 'wip' ? ' selected="selected"' : ''), '>', $txt['mark_wip'], '</option>
+							<option value="done"', ($entry['status'] == 'done' ? ' selected="selected"' : ''), '>', $txt['mark_done'], '</option>
+							<option value="reject"', ($entry['status'] == 'reject' ? ' selected="selected"' : ''), '>', $txt['mark_reject'], '</option>
+						</select>
+					</td>
+				</tr>';
+
+	// What kind of thing is this? Set the type, please.
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<select name="entry_type">
+							<option value="" disabled="disabled">', $txt['type'], '</option>
+							<option value="issue"', ($entry['type'] == 'issue' ? ' selected="selected"' : ''), '>', $txt['bugtracker_issue'], '</option>
+							<option value="feature"', ($entry['type'] == 'feature' ? ' selected="selected"' : ''), '>', $txt['bugtracker_feature'], '</option>
+						</select>
+					</td>
+				</tr>';
+	
+	// Does this entry need to be private?
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<input type="checkbox" name="entry_private" value="true"', ($entry['private'] ? ' checked="checked"' : ''), ' /> ', $txt['entry_private'], '
+					</td>
+				</tr>';
+
+	// Or does it need attention?
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<input type="checkbox" name="entry_attention" value="true"', ($entry['attention'] ? ' checked="checked"' : ''), ' /> ', $txt['mark_attention'], '
+					</td>
+				</tr>';
+				
+	// Gotta change the progress?
+	echo '
+				<tr>
+					<td class="halfwidth"></td>
+					<td class="halfwidth">
+						<select name="entry_progress">
+							<option value="0" disabled="disabled">', $txt['entry_progress'], '</option>';
+							
+	// Do it this way, since that is *quite* a bit quicker.
+	$progvalues = array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
+	foreach ($progvalues as $prog)
+	{
+		echo '
+							<option value="', $prog, '"', $entry['progress'] == $prog ? ' selected="selected"' : '', '>', $prog, '%</option>';
+	}
+	
+	echo '
+						</select>
+					</td>
+				</tr>';
+
+	// Close everything. And start the editor.
+	echo '
+			</table>
+
+			<hr />
+			
+			<div id="bbcBox_message"></div>
+			<div id="smileyBox_message"></div>
+			', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message') . '<br /><hr />';
+
+	// Some hidden stuff.
+	echo '
+			<input type="hidden" name="entry_id" value="', $entry['id'], '" />
+			<input type="hidden" name="is_fxt" value="true" />';
+
+	// And our submit button and closing stuff.
+	echo '	
+			<div class="floatright" style="margin-right:10px">
+				<input type="submit" value="', $txt['entry_submit'], '" class="button_submit" />
+			</div>
+			<br class="clear" />
 		</div>		
 		<span class="botslice"><span></span></span>
 	</div>';
