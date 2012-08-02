@@ -60,10 +60,10 @@ function template_TrackerView()
 	echo '
 		</ul>
 	</div>
-	<table style="width: 100%">
+	<table class="fullwidth">
 		<tr>
 			<td style="width: 5%">
-				<div class="plainbox" style="text-align:right">
+				<div class="plainbox righttext">
 					<strong>', $txt['title'], ':</strong><br />
 					<strong>', $txt['type'], ':</strong><br />
 					<strong>', $txt['tracker'], ':</strong><br />
@@ -97,7 +97,7 @@ function template_TrackerView()
 	</div>
 	<div class="windowbg2">		
 		<span class="topslice"><span></span></span>
-		<div style="margin-left: 10px">
+		<div class="fullmargin">
 			', $context['bugtracker']['entry']['desc'], '
 		</div>
 		<span class="botslice"><span></span></span>

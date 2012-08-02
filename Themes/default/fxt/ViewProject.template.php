@@ -28,7 +28,7 @@ function template_TrackerViewProject()
 		</ul>
 	</div><br />
 	<div class="tborder topic_table">
-		<table class="table_grid" cellspacing="0" style="width: 100%">
+		<table class="table_grid fullwidth" cellspacing="0">
 			<thead>
 				<tr class="catbg">
 					<th scope="col" class="first_th" width="8%" colspan="2">&nbsp;</th>
@@ -44,27 +44,26 @@ function template_TrackerViewProject()
 				</tr>
 			</thead>
 			<tbody>';
-	$i = 0;
+
 	foreach ($context['bugtracker']['entries'] as $entry)
 	{
 		if ($entry['status'] == 'done' && !isset($_GET['viewclosed']))
 			continue;
 		
-		$i++;
 		echo '
 				<tr>
 					<td class="icon1 windowbg">
 						<img src="', $settings['images_url'], '/bugtracker/', $entry['type'], '.png" alt="" />
 					</td>
 					<td class="icon2 windowbg">
-						', $entry['attention'] ? '<img src="' . $settings['images_url'] . '/bugtracker/attention.png" alt="" /><span style="font-size: 120%">/</span>' : '', '<img src="' . $settings['images_url'] . '/bugtracker/', $entry['status'] == 'wip' ? 'wip.gif' : $entry['status'] . '.png', '" alt="" />
+						', $entry['attention'] ? '<img src="' . $settings['images_url'] . '/bugtracker/attention.png" alt="" /><span class="iconslash">/</span>' : '', '<img src="' . $settings['images_url'] . '/bugtracker/', $entry['status'] == 'wip' ? 'wip.gif' : $entry['status'] . '.png', '" alt="" />
 					</td>
 					<td class="subject windowbg2">
 						<div>
 							<span>
 								<a href="', $scripturl, '?action=bugtracker;sa=view;entry=', $entry['id'], '">
 									', $entry['name'], '
-								</a> ', $entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . ')</span>' : '', '
+								</a> ', $entry['status'] == 'wip' ? '<span class="smalltext progress">(' . $entry['progress'] . ')</span>' : '', '
 							</span>
 							<p>', $entry['shortdesc'], '</p>
 						</div>
@@ -78,10 +77,11 @@ function template_TrackerViewProject()
 				</tr>';
 	}
 	echo '
+			</tbody>
 		</table>';
 
-	if ($i == 0)
-		echo '<div class="centertext windowbg2" style="padding: 5px;">', $txt['no_items'], '</div>';
+	if (empty($context['bugtracker']['entries']))
+		echo '<div class="centertext windowbg2 halfpadding">', $txt['no_items'], '</div>';
 
 	echo '
 	</div><br />
@@ -94,7 +94,7 @@ function template_TrackerViewProject()
 	{
 		echo '
 	<div class="tborder topic_table">
-		<table class="table_grid" cellspacing="0" style="width: 100%">
+		<table class="table_grid fullwidth" cellspacing="0">
 			<thead>
 				<tr class="catbg">
 					<th scope="col" class="first_th" width="8%" colspan="2">&nbsp;</th>
@@ -124,7 +124,7 @@ function template_TrackerViewProject()
 						<div>
 							<span>
 								<a href="', $scripturl, '?action=bugtracker;sa=view;entry=', $entry['id'], '">
-									', $entry['name'], ' ', $entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . ')</span>' : '', ' 
+									', $entry['name'], ' ', $entry['status'] == 'wip' ? '<span class="smalltext progress">(' . $entry['progress'] . ')</span>' : '', ' 
 								</a>
 							</span>
 							<p>', $entry['shortdesc'], '</p>

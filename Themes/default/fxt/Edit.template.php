@@ -23,7 +23,7 @@ function template_BugTrackerEdit()
 	</div>
 	<div class="windowbg">
 		<span class="topslice"><span></span></span>
-		<div style="margin-left:10px">
+		<div class="fullpadding">
 			<table class="fullwidth">';
 
 	// The entry title. Lets start with that.
@@ -33,7 +33,7 @@ function template_BugTrackerEdit()
 						<strong>', $txt['title'], '</strong>
 					</td>
 					<td class="halfwidth">
-						<input type="text" style="width: 98%" name="entry_title" value="', $entry['name'], '" />
+						<input type="text" name="entry_title" class="fullwidth" value="', $entry['name'], '" />
 					</td>
 				</tr>';
 
@@ -120,7 +120,7 @@ function template_BugTrackerEdit()
 
 	// And our submit button and closing stuff.
 	echo '	
-			<div class="floatright" style="margin-right:10px">
+			<div class="floatright">
 				<input type="submit" value="', $txt['entry_submit'], '" class="button_submit" />
 			</div>
 			<br class="clear" />
