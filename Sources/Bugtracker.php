@@ -11,7 +11,6 @@ function BugTrackerMain()
 
 	// Load the language and template. Oh, don't forget our CSS file, either.
 	loadLanguage('BugTracker');
-	loadTemplate('BugTracker');
 	loadTemplate(false, 'bugtracker');
 
 	// Are we allowed to view this?
@@ -69,6 +68,9 @@ function BugTrackerHome()
 {
 	// Global some stuff
 	global $smcFunc, $context, $user_info, $user_profile, $txt;
+	
+	// Load our Home template.
+	loadTemplate('fxt/Home');
 
 	// Set the page title.
 	$context['page_title'] = $txt['bugtracker_index'];
@@ -193,6 +195,9 @@ function BugTrackerView()
 	// Are we allowed to view private issues, and is this one of them?
 	if (!allowedTo('bugtracker_viewprivate') && $data['private'] == 1)
 		fatal_lang_error('entry_is_private', false);
+		
+	// Okay, load the template now.
+	loadTemplate('fxt/View');
 
 	// Load the data for the tracker.
 	loadMemberData($data['tracker']);
@@ -354,6 +359,9 @@ function BugTrackerEdit()
 	// Or... It is private! I know!
 	if (!allowedTo('bt_viewprivate') && $entry['private'])
 		fatal_lang_error('entry_is_private', false);
+		
+	// Load the template...
+	loadTemplate('fxt/Edit');
 
 	// We want the default SMF WYSIWYG editor and Subs-Post.php to make stuff look SMF-ish.
 	require_once($sourcedir . '/Subs-Editor.php');
@@ -557,6 +565,9 @@ function BugTrackerNewEntry()
 	// Wait.... There is no project like this? Or there's more with the *same* ID? :O
 	if ($smcFunc['db_num_rows']($result) == 0 || $smcFunc['db_num_rows']($result) > 1)
 		fatal_lang_error('project_no_exist');
+		
+	// Load the template for this.
+	loadTemplate('fxt/AddNew');
 
 	// So we have just one...
 	$project = $smcFunc['db_fetch_assoc']($result);
@@ -785,7 +796,7 @@ function BugTrackerViewProject()
 	}
 
 	// Load the template.
-	loadTemplate('BugTrackerProject');
+	loadTemplate('fxt/ViewProject');
 	
 	// How many items are closed?
 	$context['bugtracker']['num_closed'] = $closed;

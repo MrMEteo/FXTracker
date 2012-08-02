@@ -43,3 +43,16 @@ function fxt_permissions(&$permissionGroups, &$permissionList)
 	$permissionList['membergroup']['bugtracker_view'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bugtracker_view'] = array(false, 'fxt_classic', 'fxt_simple');*/
 }
+
+function fxt_menubutton(&$menu_buttons)
+{
+    global $txt, $scripturl;
+    loadLanguage('BugTracker');
+    $menu_buttons['bugtracker'] = array(
+        'title' => $txt['bugtracker'],
+        'href' => $scripturl . '?action=bugtracker',
+        'show' => allowedTo('bugtracker_view'),
+        'sub_buttons' => array(
+        ),
+    );
+}
