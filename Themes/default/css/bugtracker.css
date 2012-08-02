@@ -14,7 +14,32 @@
 	width: 50%;
 }
 
-.sceditorfont
+.fullpadding
 {
-	font: 78%/130% "Verdana", "Arial", "Helvetica", sans-serif;
+	padding: 10px;
+}
+
+.halfpadding
+{
+	padding: 5px;
+}
+
+.fullmargin
+{
+	margin: 10px;
+}
+
+.halfmargin
+{
+	margin: 5px;
+}
+
+.iconslash
+{
+	font-size: 120%;
+}
+
+.progress
+{
+	color: #E00000;
 }
