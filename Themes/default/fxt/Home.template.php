@@ -204,7 +204,7 @@ function template_TrackerHome()
 			// And project!
 			echo '
 					<td class="stats windowbg">
-						', !empty($entry['project']) ? '<a href="' . $scripturl . '?action=bugtracker;sa=viewproject;project=' . $entry['project']['id'] . '">' . $entry['project']['name'] . '</a>' : $txt['na'], '
+						', !empty($entry['project']) ? '<a href="' . $scripturl . '?action=bugtracker;sa=projectindex;project=' . $entry['project']['id'] . '">' . $entry['project']['name'] . '</a>' : $txt['na'], '
 					</td>';
 					
 			// Close this entry -- up to the next!
