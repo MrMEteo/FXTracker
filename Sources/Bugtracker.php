@@ -965,6 +965,9 @@ function BugTrackerViewStatus()
 
 	if (!in_array($_GET['status'], $types))
 		fatal_lang_error('project_no_exist');
+		
+	// Load the template.
+	loadTemplate('fxt/ViewType');
 
 	// Okay, then start loading every entry.
 	$private = !allowedTo('bugtracker_viewprivate') ? 'AND private="0"' : '';
