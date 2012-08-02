@@ -53,6 +53,11 @@ function fxt_menubutton(&$menu_buttons)
         'href' => $scripturl . '?action=bugtracker',
         'show' => allowedTo('bugtracker_view'),
         'sub_buttons' => array(
+            'bt_admin' => array(
+                'title' => $txt['bt_acp_b'],
+                'href' => $scripturl . '?action=bugtracker;sa=admin',
+                'show' => allowedTo('bugtracker_view') && allowedTo('bugtracker_admin'),
+            ),
         ),
     );
 }
