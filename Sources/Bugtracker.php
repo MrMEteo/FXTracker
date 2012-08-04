@@ -28,7 +28,7 @@ function BugTrackerMain()
 
 		'home' => array('Home', 'Home'),
 
-		'mark' => array('Mark', 'MarkEntry'),
+		'mark' => array('Edit', 'MarkEntry'),
 
 		'new' => array('Add', 'NewEntry'),
 		'new2' => array('Add', 'SubmitNewEntry'),
@@ -60,7 +60,7 @@ function BugTrackerMain()
 			$action = $_GET['sa'];
 	}
 	
-	// Action is home?
+	// Action is home? We forgot to include something, then!
 	if ($action == 'home')
 		include($sourcedir . '/FXTracker/Home.php');
 	
