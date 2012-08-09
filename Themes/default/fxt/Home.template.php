@@ -36,7 +36,7 @@ function template_TrackerHome()
 	// Now for the Latest xxx boxes
 	echo '
 	<div class="floatleft" style="width:49.9%">
-		<div class="', !empty($context['bugtracker']['latest']['issues']) ? 'plainbox' : 'information', '">';
+		<div class="plainbox">';
 
 	// Load the list of entries from the latest issues, and display them in a list.
 	if (!empty($context['bugtracker']['latest']['issues']))
@@ -68,7 +68,7 @@ function template_TrackerHome()
 		</div>
 	</div>
 	<div class="floatright" style="width: 49.9%">
-		<div class="', !empty($context['bugtracker']['latest']['features']) ? 'plainbox' : 'information', '">';
+		<div class="plainbox">';
 
 	// Load the list of entries from the latest features. Make a nice list of 'em!
 	if (!empty($context['bugtracker']['latest']['features']))
@@ -116,7 +116,7 @@ function template_TrackerHome()
 		<span class="topslice"><span></span></span>
 		<div class="info" style="margin-left: 10px">
 			<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $id, '"><span class="projsubject">', $project['name'], '</span></a> - ', sprintf($txt['issues'], $project['num']['issues']), ', ', sprintf($txt['features'], $project['num']['features']), '<br />
-			', $project['description'], '
+			<span class="smalltext">', $project['description'], '</span>
 		</div>
 		<span class="botslice"><span></span></span>
 	</div>';
