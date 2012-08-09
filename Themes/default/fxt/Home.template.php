@@ -15,7 +15,7 @@ function template_TrackerHome()
 		</h3>
 	</div>';
 
-	// These are the latest xxx headers. Title bars, to be exact.
+	// These are the latest headers. Title bars, to be exact.
 	echo '
 	<div class="floatleft" style="width:49.9%">
 		<div class="title_barIC">
@@ -33,7 +33,7 @@ function template_TrackerHome()
 	</div>
 	<br class="clear" />';
 
-	// Now for the Latest xxx boxes
+	// Now for the Latest boxes
 	echo '
 	<div class="floatleft" style="width:49.9%">
 		<div class="plainbox">';
@@ -48,11 +48,19 @@ function template_TrackerHome()
 		foreach ($context['bugtracker']['latest']['issues'] as $entry)
 		{
 			echo '
-				<li>
-					', !empty($entry['project']) ? '[<a href="' . $scripturl . '?action=bugtracker;sa=projectindex;project=' . $entry['project']['id'] . '">
+				<li>';
+				
+					// Probably this entry has a project associated...
+					if (!empty($entry['project']))
+						echo '
+					[<a href="' . $scripturl . '?action=bugtracker;sa=projectindex;project=' . $entry['project']['id'] . '">
 						' . $entry['project']['name'] . '
-					</a>] ' : '', '
-					#', $entry['id'], ': <a href="', $scripturl, '?action=bugtracker;sa=view;entry=', $entry['id'], '">
+					</a>]';
+					
+					// Though it certainly has a name!
+					echo '
+					#', $entry['id'], ':
+					<a href="', $scripturl, '?action=bugtracker;sa=view;entry=', $entry['id'], '">
 						', $entry['name'], '
 					</a>
 				</li>';
@@ -80,11 +88,19 @@ function template_TrackerHome()
 		foreach ($context['bugtracker']['latest']['features'] as $entry)
 		{
 			echo '
-				<li>
-					', !empty($entry['project']) ? '[<a href="' . $scripturl . '?action=bugtracker;sa=projectindex;project=' . $entry['project']['id'] . '">
+				<li>';
+				
+					// Probably this entry has a project associated...
+					if (!empty($entry['project']))
+						echo '
+					[<a href="' . $scripturl . '?action=bugtracker;sa=projectindex;project=' . $entry['project']['id'] . '">
 						' . $entry['project']['name'] . '
-					</a>] ' : '', '
-					#', $entry['id'], ': <a href="', $scripturl, '?action=bugtracker;sa=view;entry=', $entry['id'], '">
+					</a>]';
+					
+					// Though it certainly has a name!
+					echo '
+					#', $entry['id'], ':
+					<a href="', $scripturl, '?action=bugtracker;sa=view;entry=', $entry['id'], '">
 						', $entry['name'], '
 					</a>
 				</li>';
@@ -99,8 +115,10 @@ function template_TrackerHome()
 	echo '
 		</div>
 	</div>
-	<br class="clear" />
-
+	<br class="clear" />';
+	
+	// Lets start with the projects shall we?
+	echo'
 	<div class="cat_bar">
 		<h3 class="catbg">
 			<img src="', $settings['images_url'], '/bugtracker/projects.png" class="icon" alt="" />', $txt['bugtracker_projects'], '
@@ -114,8 +132,21 @@ function template_TrackerHome()
 		echo '
 	<div class="windowbg', $windowbg == 0 ? '' : '2', '">
 		<span class="topslice"><span></span></span>
-		<div class="info" style="margin-left: 10px">
-			<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $id, '"><span class="projsubject">', $project['name'], '</span></a> - ', sprintf($txt['issues'], $project['num']['issues']), ', ', sprintf($txt['features'], $project['num']['features']), '<br />
+		<div class="info" style="margin-left: 10px">';
+		
+			// The project name?
+			echo '
+			<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $id, '">
+				<span class="projsubject">
+					', $project['name'], '
+				</span>
+			</a>';
+			
+			// How many issues and features does this thing have?
+			echo '- ', sprintf($txt['issues'], $project['num']['issues']), ', ', sprintf($txt['features'], $project['num']['features']), '<br />';
+			
+			// And the description along with other stuff...
+			echo '
 			<span class="smalltext">', $project['description'], '</span>
 		</div>
 		<span class="botslice"><span></span></span>
@@ -127,7 +158,8 @@ function template_TrackerHome()
 	echo '<br />
 	<div class="cat_bar">
 		<h3 class="catbg">
-			<img src="', $settings['images_url'], '/bugtracker/attention.png" class="icon" alt="" />', sprintf($txt['items_attention'], count($context['bugtracker']['attention'])), '
+			<img src="', $settings['images_url'], '/bugtracker/attention.png" class="icon" alt="" />
+			', sprintf($txt['items_attention'], count($context['bugtracker']['attention'])), '
 		</h3>
 	</div>';
 
@@ -139,20 +171,38 @@ function template_TrackerHome()
 	<div class="tborder topic_table">
 		<table class="table_grid" cellspacing="0" style="width: 100%">
 			<thead>
-				<tr class="catbg">
-					<th scope="col" class="first_th" width="8%" colspan="2">&nbsp;</th>
+				<tr class="catbg">';
+				
+				// Start with two empty columns...
+				echo '
+					<th scope="col" class="first_th" width="8%" colspan="2">&nbsp;</th>';
+					
+				// Then the subject header...
+				echo '
 					<th scope="col">
 						', $txt['subject'], '
-					</th>
+					</th>';
+				
+				// The status...
+				echo '
 					<th scope="col" width="18%">
 						', $txt['status'], '
-					</th>
+					</th>';
+					
+				// Then the type...
+				echo '
 					<th scope="col" width="18%">
 						', $txt['type'], '
-					</th>
+					</th>';
+					
+				// Project...
+				echo '
 					<th scope="col" width="16%" class="last_th">
 						', $txt['project'], '
-					</th>
+					</th>';
+					
+				// And go on to the entries.
+				echo '
 				</tr>
 			</thead>
 			<tbody>';
@@ -192,19 +242,25 @@ function template_TrackerHome()
 			// The status...
 			echo '
 					<td class="stats windowbg">
-						<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $entry['status'], '">', $txt['status_' . $entry['status']], '</a>
+						<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $entry['status'], '">
+							', $txt['status_' . $entry['status']], '
+						</a>
 					</td>';
 			
 			// Type?
 			echo '
 					<td class="stats windowbg2">
-						<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $entry['type'], '">', $txt['bugtracker_' . $entry['type']], '</a>
+						<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $entry['type'], '">
+							', $txt['bugtracker_' . $entry['type']], '
+						</a>
 					</td>';
 			
 			// And project!
 			echo '
 					<td class="stats windowbg">
-						', !empty($entry['project']) ? '<a href="' . $scripturl . '?action=bugtracker;sa=projectindex;project=' . $entry['project']['id'] . '">' . $entry['project']['name'] . '</a>' : $txt['na'], '
+						', !empty($entry['project']) ? '<a href="' . $scripturl . '?action=bugtracker;sa=projectindex;project=' . $entry['project']['id'] . '">
+							' . $entry['project']['name'] . '
+						</a>' : $txt['na'], '
 					</td>';
 					
 			// Close this entry -- up to the next!
@@ -234,7 +290,6 @@ function template_TrackerHome()
 	
 	// And our last batch of HTML.
 	echo '
-	<span class="centertext"><a href="', $scripturl, '?action=bugtracker;sa=admin">', $txt['bt_acp'], '</a></span>
 	<br class="clear" />';
 }
 
