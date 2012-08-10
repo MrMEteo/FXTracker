@@ -6,18 +6,6 @@ function template_TrackerViewType()
 {
 	global $context, $scripturl, $txt, $settings;
 
-	if (!isset($_GET['status']))
-		echo '
-	<div class="buttonlist">
-		<ul>
-			<li>
-				<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $context['bugtracker']['viewtype_type'] . (isset($_GET['viewclosed']) ? '' : ';viewclosed'), '">
-					<span>', isset($_GET['viewclosed']) ? $txt['hideclosed'] : $txt['viewclosed'] . ' [' . $context['bugtracker']['num_closed'] . ']', '</span>
-				</a>
-			</li>
-		</ul>
-	</div><br />';
-
 	echo '
 	<div class="tborder topic_table">
 		<table class="table_grid fullwidth" cellspacing="0">
@@ -41,10 +29,7 @@ function template_TrackerViewType()
 			<tbody>';
 	
 	foreach ($context['bugtracker']['entries'] as $entry)
-	{
-		if ($entry['status'] == 'done' && !isset($_GET['viewclosed']) && !isset($_GET['status']))
-			continue;
-		
+	{	
 		echo '
 				<tr>
 					<td class="icon1 windowbg">

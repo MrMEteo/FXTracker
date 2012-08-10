@@ -78,7 +78,7 @@ function template_TrackerView()
 
 					<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $context['bugtracker']['entry']['type'], '">', $txt['bugtracker_' . $context['bugtracker']['entry']['type']], '</a><br />
 
-					<a style="color:', $context['bugtracker']['entry']['tracker']['member_group_color'], '" href="', $scripturl, '?action=profile;u=', $context['bugtracker']['entry']['tracker']['id_member'], '">', $context['bugtracker']['entry']['tracker']['member_name'], '</a> (', $context['bugtracker']['entry']['tracker']['member_group'], ')<br />
+					<a href="', $scripturl, '?action=profile;u=', $context['bugtracker']['entry']['tracker']['id_member'], '">', $context['bugtracker']['entry']['tracker']['member_name'], '</a> (', empty($context['bugtracker']['entry']['tracker']['member_group']) ? $context['bugtracker']['entry']['tracker']['post_group'] : $context['bugtracker']['entry']['tracker']['member_group'], ')<br />
 
 					<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $context['bugtracker']['entry']['status'], '">', $txt['status_' . $context['bugtracker']['entry']['status']] . '</a>' . ($context['bugtracker']['entry']['attention'] ? ' <strong>(' . $txt['status_attention'] . ')</strong>' : ''), '<br />
 
@@ -89,11 +89,11 @@ function template_TrackerView()
 			</td>
 		</tr>
 	</table>
-	<div class="title_barIC">
-		<h4 class="titlebg">
+	<div class="cat_bar">
+		<h3 class="catbg">
 			<img class="icon" src="', $settings['images_url'], '/bugtracker/description.png" alt="" />
 			', $txt['description'], '
-		</h4>
+		</h3>
 	</div>
 	<div class="windowbg2">		
 		<span class="topslice"><span></span></span>
@@ -158,6 +158,62 @@ function template_TrackerView()
 				</a>
 			</li>
 		</ul>
+	</div>';
+	
+	echo '
+	<br class="clear" /><br />
+	
+	<div class="cat_bar">
+		<h3 class="catbg">
+			', $txt['notes'], '
+		</h3>
+	</div>';
+	
+	// Are we allowed to add notes? :D
+	if ($context['can_bt_add_note_any'] || $context['can_bt_add_note_own'])
+		echo '
+	<div class="buttonlist">
+		<ul>
+			<li>
+				<a class="active" href="', $scripturl, '?action=bugtracker;sa=addnote;entry=', $context['bugtracker']['entry']['id'], '">
+					<span>', $txt['add_note'], '</span>
+				</a>
+			</li>
+		</ul>
+	</div><br />';
+		
+	
+	if (!empty($context['bugtracker']['entry']['notes']))
+	{
+		foreach ($context['bugtracker']['entry']['notes'] as $note)
+		{
+			echo '
+	<div class="plainbox">';
+			$buttons = array();
+			
+			// Edit it?
+			if (allowedTo('bt_edit_note_any') || (allowedTo('bt_edit_note_own') && $context['user']['id'] == $note['user']['id_member']))
+				$buttons[] = '<a href="' . $scripturl . '?action=bugtracker;sa=editnote;note=' . $note['id'] . '">' . $txt['edit_note'] . '</a>';
+		
+			// Can we remove this note?
+			if (allowedTo('bt_remove_note_any') || (allowedTo('bt_remove_note_own') && $context['user']['id'] == $note['user']['id_member']))
+				$buttons[] = '<a onclick="return confirm(' . javascriptescape($txt['really_delete_note']) . ')" href="' . $scripturl . '?action=bugtracker;sa=removenote;note=' . $note['id'] . '">' . $txt['remove_note'] . '</a>';
+			
+			if (!empty($buttons))
+				echo '<div class="floatright">' . implode(' | ', $buttons) . '</div>';
+			
+			echo '
+		', sprintf($txt['note_by'], $note['user']['member_name'], date('d-m-Y H:i:s', $note['time']), $scripturl . '?action=profile;u=' . $note['user']['id_member']), '
+		<hr />
+		', $note['text'], '
+	</div>';
+		
+		}
+	}
+	else
+		echo '
+	<div class="plainbox centertext">
+		<strong>', $txt['no_notes'], '</strong>
 	</div>';
 	
 	echo '

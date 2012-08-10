@@ -30,7 +30,7 @@ function BugTrackerView()
 	$data = $smcFunc['db_fetch_assoc']($request);
 
 	// Are we allowed to view private issues, and is this one of them?
-	if (!allowedTo('bugtracker_viewprivate') && $data['private'] == 1)
+	if ($data['tracker'] != $context['user']['id'] && (!allowedTo('bugtracker_viewprivate') && $data['private'] == 1))
 		fatal_lang_error('entry_is_private', false);
 		
 	// Okay, load the template now.
@@ -38,6 +38,35 @@ function BugTrackerView()
 
 	// Load the data for the tracker.
 	loadMemberData($data['tracker']);
+	
+	// Load every note associated with this entry...
+	$result = $smcFunc['db_query']('', '
+		SELECT
+			id, authorid, time_posted,
+			note
+		FROM {db_prefix}bugtracker_notes
+		WHERE entryid = {int:id}
+		ORDER BY time_posted DESC',
+		array(
+			'id' => $data['entry_id'],
+		)
+	);
+	
+	// Fetch them.
+	$notes = array();
+	while ($note = $smcFunc['db_fetch_assoc']($result))
+	{
+		// Okay, we're not afraid to load the data of the tracker.
+		loadMemberData($note['authorid']);
+		
+		// Then put this note together.
+		$notes[] = array(
+			'id' => $note['id'],
+			'text' => parse_bbc($note['note']),
+			'time' => $note['time_posted'],
+			'user' => $user_profile[$note['authorid']],
+		);
+	}
 
 	// Put the data in $context for the template!
 	$context['bugtracker']['entry'] = array(
@@ -56,6 +85,7 @@ function BugTrackerView()
 		'attention' => $data['attention'],
 		'progress' => (empty($data['progress']) ? '0' : $data['progress']) . '%',
 		'is_new' => isset($_GET['new']),
+		'notes' => $notes,
 	);
 
 	// Stuff the linktree.
@@ -69,7 +99,7 @@ function BugTrackerView()
 	);
 
 	// Setup permissions... Not just one of them!
-        $own_any = array('mark', 'mark_new', 'mark_wip', 'mark_done', 'mark_reject', 'mark_attention', 'reply', 'edit', 'remove');
+        $own_any = array('mark', 'mark_new', 'mark_wip', 'mark_done', 'mark_reject', 'mark_attention', 'reply', 'edit', 'remove', 'remove_note', 'edit_note', 'add_note');
         $is_own = $context['user']['id'] == $data['tracker'];
         foreach ($own_any as $perm)
         {
@@ -79,6 +109,7 @@ function BugTrackerView()
 	
 	// If we can mark something.... tell us!
         $context['bt_can_mark'] = allowedTo(array('can_bt_mark_own', 'can_bt_mark_any')) && allowedTo(array('can_bt_mark_new_own', 'can_bt_mark_new_any', 'can_bt_mark_wip_own', 'can_bt_mark_wip_any', 'can_bt_mark_done_own', 'can_bt_mark_done_any', 'can_bt_mark_reject_own', 'can_bt_mark_reject_any'));
+	
 
 	// Set the title.
 	$context['page_title'] = sprintf($txt['view_title'], $data['entry_id']);
@@ -109,16 +140,23 @@ function BugTrackerViewProject()
 	// Fetch it!
 	$pdata = $smcFunc['db_fetch_assoc']($result);
 	
+	// View closed, or rejected, or...both?
+	$viewboth = isset($_GET['viewall']) || (isset($_GET['viewrejected']) && isset($_GET['viewclosed']));
+	$viewclosed = isset($_GET['viewclosed']) || $viewboth;
+	$viewrejected = isset($_GET['viewrejected']) || $viewboth;
+	
 	// Grab the entries.
-	$private = !allowedTo('bugtracker_viewprivate') ? 'AND private="0"' : '';
+	$where = 'project = {int:projectid}';
+	if (!allowedTo('bugtracker_viewprivate'))
+		$where .= ' AND private = 0';
+	
 	$result = $smcFunc['db_query']('', '
 		SELECT
 			id, name, description, type,
 			status, progress, private,
 			attention
 		FROM {db_prefix}bugtracker_entries
-		WHERE project = {int:projectid}
-		' . $private . '
+		WHERE ' . $where . '
 		ORDER BY id DESC',
 		array(
 			'projectid' => $pdata['id'],
@@ -127,28 +165,40 @@ function BugTrackerViewProject()
 
 	// If we've got none, too bad. Just start dammit.
 	$closed = 0;
+	$rejected = 0;
 	$entries = array();
 	$attention = array();
 	while ($entry = $smcFunc['db_fetch_assoc']($result))
 	{
+		// Is the status of this entry "attention"? If so, add it to the list of attention requirements thingies!
+		// This goes before anything else, it has some kind of priority!!
+		if ($entry['attention'])
+			$attention[] = $entries[$entry['id']];
+
+		// Okay, if this entry is marked as closed and we aren't viewing closed entries, skip it.
+		if ($entry['status'] == 'done' && !$viewclosed)
+		{
+			$closed++;
+			continue;
+		}
+			
+		if ($entry['status'] == 'reject' && !$viewrejected)
+		{
+			$rejected++;
+			continue;
+		}
+	
 		// Then we're ready for some action.
 		$entries[$entry['id']] = array(
 			'id' => $entry['id'],
 			'name' => $entry['name'],
 			'shortdesc' => shorten_subject($smcFunc['htmlspecialchars']($entry['description']), 50),
 			'type' => $entry['type'],
-			'private' => ($entry['private'] == 1 ? true : false),
+			'private' => $entry['private'],
 			'status' => $entry['status'],
 			'attention' => $entry['attention'],
-               		'progress' => empty($entry['progress']) ? '0%' : $entry['progress'] . '%',
+			'progress' => empty($entry['progress']) ? '0%' : $entry['progress'] . '%',
 		);
-
-		// Is the status of this entry "attention"? If so, add it to the list of attention requirements thingies!
-		if ($entry['attention'])
-			$attention[] = $entries[$entry['id']];
-
-		if ($entry['status'] == 'done')
-			$closed++;
 	}
 
 	// Load the template.
@@ -156,6 +206,17 @@ function BugTrackerViewProject()
 	
 	// How many items are closed?
 	$context['bugtracker']['num_closed'] = $closed;
+	$context['bugtracker']['num_rejected'] = $rejected;
+	
+	// Viewing a category?
+	$context['bugtracker']['view'] = array(
+		'closed' => $viewclosed,
+		'rejected' => $viewrejected,
+		'link' => array(
+			'closed' => $viewboth ? ';viewrejected' : ($viewrejected ? ';viewall' : ($viewclosed ? '' : ';viewclosed')),
+			'rejected' => $viewboth ? ';viewclosed' : ($viewclosed ? ';viewall' : ($viewrejected ? '' : ';viewrejected')),
+		),
+	);
 
 	// What do we have, from issues and such?
 	$context['bugtracker']['entries'] = $entries;

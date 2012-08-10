@@ -53,8 +53,7 @@ $txt['shortdesc'] = 'Short Description';
 
 $txt['items_attention'] = '%d item(s) requiring attention';
 
-$txt['go_comments'] = 'Go to the comments';
-$txt['comments'] = 'Comments';
+$txt['go_notes'] = 'Go to notes';
 $txt['editentry'] = 'Edit Entry';
 $txt['removeentry'] = 'Remove Entry';
 
@@ -62,6 +61,9 @@ $txt['project'] = 'Project';
 
 $txt['viewclosed'] = 'View resolved entries';
 $txt['hideclosed'] = 'Hide resolved entries';
+$txt['viewrejected'] = 'View rejected entries';
+$txt['hiderejected'] = 'Hide rejected entries';
+$txt['restore'] = 'Restore';
 
 $txt['new_entry'] = 'New entry';
 
@@ -97,6 +99,24 @@ $txt['total_issues'] = 'Total issues:';
 $txt['total_features'] = 'Total features:';
 $txt['total_attention'] = 'Total requiring attention:';
 
+$txt['notes'] = 'Notes';
+
+// 1: user name, 2: date, 3: url to user profile
+$txt['note_by'] = 'Note left by <a href="%3$s"><strong>%1$s</strong></a> on %2$s:';
+$txt['note_delete_failed'] = 'An error occured while removing the note.';
+$txt['note_delete_cannot'] = 'You are not permitted to remove this note.';
+$txt['note_delete_notyours'] = 'You cannot remove someone else\'s notes.';
+$txt['really_delete_note'] = 'Really delete this note? This cannot be undone!';
+$txt['remove_note'] = 'Remove note';
+$txt['note_no_exist'] = 'This note doesn\'t exist (anymore).';
+$txt['note_save_failed'] = 'An error occured while saving the note. Please try submitting it again.';
+$txt['note_edit_notyours'] = 'You cannot edit someone else\'s notes.';
+$txt['edit_note'] = 'Edit note';
+$txt['add_note'] = 'Add note';
+$txt['no_notes'] = 'There are no notes to display.';
+$txt['cannot_add_note'] = 'You cannot add a note to this entry.';
+$txt['note_empty'] = 'You didn\'t enter a note!';
+
 // Permissions
 $txt['permissiongroup_fxt_classic'] = 'FXTracker Permissions';
 $txt['permissiongroup_simple_fxt_simple'] = 'FXTracker Permissions';
@@ -124,5 +144,6 @@ $txt['permissionname_bt_mark_attention_own'] = 'Mark own entry as requiring atte
 
 $txt['cannot_bugtracker_view'] = 'Sorry, but you do not have permission to view the bug tracker.';
 $txt['cannot_bt_add'] = 'Sorry, you are not allowed to add new entries to the bug tracker.';
+$txt['cannot_bt_add_note'] = 'Sorry, you are not allowed to add notes to entries in the bug tracker.';
 
 ?>

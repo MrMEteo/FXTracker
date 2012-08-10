@@ -10,8 +10,22 @@ function template_TrackerViewProject()
 	<div class="buttonlist">
 		<ul>
 			<li>
-				<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $context['bugtracker']['project']['id'] . (isset($_GET['viewclosed']) ? '' : ';viewclosed'), '">
-					<span>', isset($_GET['viewclosed']) ? $txt['hideclosed'] : $txt['viewclosed'] . ' [' . $context['bugtracker']['num_closed'] . ']', '</span>
+				<a', $context['bugtracker']['view']['closed'] ? ' class="active"' : '', ' href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $context['bugtracker']['project']['id'] . $context['bugtracker']['view']['link']['closed'], '">
+					<span>', $context['bugtracker']['view']['closed'] ? $txt['hideclosed'] : $txt['viewclosed'] . ' [' . $context['bugtracker']['num_closed'] . ']', '</span>
+				</a>
+			</li>
+			<li>
+				<a', $context['bugtracker']['view']['rejected'] ? ' class="active"' : '', ' href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $context['bugtracker']['project']['id'] . $context['bugtracker']['view']['link']['rejected'], '">
+					<span>', $context['bugtracker']['view']['rejected'] ? $txt['hiderejected'] : $txt['viewrejected'] . ' [' . $context['bugtracker']['num_rejected'] . ']', '</span>
+				</a>
+			</li>';
+			
+	// A restore button?
+	if ($context['bugtracker']['view']['rejected'] || $context['bugtracker']['view']['closed'])
+		echo '
+			<li>
+				<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $context['bugtracker']['project']['id'], '">
+					<span>', $txt['restore'], '</span>
 				</a>
 			</li>';
 
@@ -47,9 +61,6 @@ function template_TrackerViewProject()
 
 	foreach ($context['bugtracker']['entries'] as $entry)
 	{
-		if ($entry['status'] == 'done' && !isset($_GET['viewclosed']))
-			continue;
-		
 		echo '
 				<tr>
 					<td class="icon1 windowbg">
