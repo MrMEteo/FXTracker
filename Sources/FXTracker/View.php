@@ -63,7 +63,7 @@ function BugTrackerView()
 		$notes[] = array(
 			'id' => $note['id'],
 			'text' => parse_bbc($note['note']),
-			'time' => $note['time_posted'],
+			'time' => timeformat($note['time_posted']),
 			'user' => $user_profile[$note['authorid']],
 		);
 	}
@@ -170,10 +170,6 @@ function BugTrackerViewProject()
 	$attention = array();
 	while ($entry = $smcFunc['db_fetch_assoc']($result))
 	{
-		// Is the status of this entry "attention"? If so, add it to the list of attention requirements thingies!
-		// This goes before anything else, it has some kind of priority!!
-		if ($entry['attention'])
-			$attention[] = $entries[$entry['id']];
 
 		// Okay, if this entry is marked as closed and we aren't viewing closed entries, skip it.
 		if ($entry['status'] == 'done' && !$viewclosed)
@@ -199,6 +195,10 @@ function BugTrackerViewProject()
 			'attention' => $entry['attention'],
 			'progress' => empty($entry['progress']) ? '0%' : $entry['progress'] . '%',
 		);
+		
+		// Is the status of this entry "attention"? If so, add it to the list of attention requirements thingies!
+		if ($entry['attention'])
+			$attention[] = $entries[$entry['id']];
 	}
 
 	// Load the template.

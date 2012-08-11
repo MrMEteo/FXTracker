@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: localhost
--- Genereertijd: 02 aug 2012 om 14:02
+-- Genereertijd: 10 aug 2012 om 22:50
 -- Serverversie: 5.5.24-log
 -- PHP-versie: 5.4.3
 
@@ -41,7 +41,33 @@ CREATE TABLE IF NOT EXISTS `smf_bugtracker_entries` (
   `in_trash` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=35 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=43 ;
+
+--
+-- Gegevens worden uitgevoerd voor tabel `smf_bugtracker_entries`
+--
+
+INSERT INTO `smf_bugtracker_entries` (`id`, `name`, `description`, `type`, `tracker`, `private`, `startedon`, `project`, `status`, `attention`, `progress`, `in_trash`) VALUES
+(39, 'An open entry', 'Testing', 'issue', 1, 0, '2012-08-09 23:06:06', 1, 'new', 0, 0, 0),
+(40, 'A closed entry', 'Posting a resolved/closed entry', 'feature', 1, 0, '2012-08-10 09:47:00', 1, 'done', 0, 0, 0),
+(41, 'A rejected entry', 'Noes I''m rejected :(', 'issue', 1, 0, '2012-08-09 19:28:58', 1, 'reject', 0, 0, 0),
+(42, 'Workin'' around', 'Just workin'' around.', 'feature', 1, 0, '2012-08-10 09:47:08', 1, 'wip', 1, 10, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `smf_bugtracker_notes`
+--
+
+CREATE TABLE IF NOT EXISTS `smf_bugtracker_notes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `authorid` int(11) NOT NULL,
+  `time_posted` int(11) NOT NULL,
+  `entryid` int(11) NOT NULL,
+  `note` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
 
@@ -65,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `smf_bugtracker_projects` (
 --
 
 INSERT INTO `smf_bugtracker_projects` (`id`, `name`, `description`, `issuenum`, `featurenum`, `lastnum`) VALUES
-(1, 'Testing', 'Test FXTracker in here', 0, 0, 0);
+(1, 'Testing', 'Test FXTracker in here', 2, 2, 0);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

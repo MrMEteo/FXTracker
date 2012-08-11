@@ -38,6 +38,8 @@ function template_TrackerViewProject()
 				</a>
 			</li>';
 
+			
+	// Just headers.
 	echo '
 		</ul>
 	</div><br />
@@ -59,41 +61,55 @@ function template_TrackerViewProject()
 			</thead>
 			<tbody>';
 
+	// Loop through all entries.
 	foreach ($context['bugtracker']['entries'] as $entry)
 	{
 		echo '
-				<tr>
+				<tr>';
+			
+		// Status icons
+		echo '
 					<td class="icon1 windowbg">
 						<img src="', $settings['images_url'], '/bugtracker/', $entry['type'], '.png" alt="" />
 					</td>
 					<td class="icon2 windowbg">
-						', $entry['attention'] ? '<img src="' . $settings['images_url'] . '/bugtracker/attention.png" alt="" /><span class="iconslash">/</span>' : '', '<img src="' . $settings['images_url'] . '/bugtracker/', $entry['status'] == 'wip' ? 'wip.gif' : $entry['status'] . '.png', '" alt="" />
-					</td>
+						<img src="' . $settings['images_url'] . '/bugtracker/', $entry['status'] == 'wip' ? 'wip.gif' : $entry['status'] . '.png', '" alt="" />
+					</td>';
+					
+		// Entry name and description
+		echo '
 					<td class="subject windowbg2">
 						<div>
 							<span>
 								<a href="', $scripturl, '?action=bugtracker;sa=view;entry=', $entry['id'], '">
-									', $entry['name'], '
-								</a> ', $entry['status'] == 'wip' ? '<span class="smalltext progress">(' . $entry['progress'] . ')</span>' : '', '
+									', $entry['name'], ' ', $entry['status'] == 'wip' ? '<span class="smalltext progress">(' . $entry['progress'] . ')</span>' : '', ' 
+								</a>
 							</span>
 							<p>', $entry['shortdesc'], '</p>
 						</div>
-					</td>
+					</td>';
+					
+		// Status and type
+		echo '
 					<td class="stats windowbg">
 						<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $entry['status'], '">', $txt['status_' . $entry['status']], '</a>
 					</td>
 					<td class="stats windowbg2">
 						<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $entry['type'], '">', $txt['bugtracker_' . $entry['type']], '</a>
-					</td>
+					</td>';
+					
+		echo '
 				</tr>';
 	}
 	echo '
 			</tbody>
 		</table>';
 
+	// Nothing?
 	if (empty($context['bugtracker']['entries']))
 		echo '<div class="centertext windowbg2 halfpadding">', $txt['no_items'], '</div>';
 
+	// Got anything interesting, or rather important?
 	echo '
 	</div><br />
 	<div class="title_bar">
@@ -106,7 +122,10 @@ function template_TrackerViewProject()
 		echo '
 	<div class="tborder topic_table">
 		<table class="table_grid fullwidth" cellspacing="0">
-			<thead>
+			<thead>';
+			
+		// Headers.
+		echo '
 				<tr class="catbg">
 					<th scope="col" class="first_th" width="8%" colspan="2">&nbsp;</th>
 					<th scope="col">
@@ -118,19 +137,28 @@ function template_TrackerViewProject()
 					<th scope="col" width="18%" class="last_th">
 						', $txt['type'], '
 					</th>
-				</tr>
+				</tr>';
+				
+		// On to the entries.
+		echo '
 			</thead>
 			<tbody>';
 		foreach ($context['bugtracker']['attention'] as $entry)
 		{
 			echo '
-				<tr>
+				<tr>';
+				
+			// Status icons
+			echo '
 					<td class="icon1 windowbg">
 						<img src="', $settings['images_url'], '/bugtracker/', $entry['type'], '.png" alt="" />
 					</td>
 					<td class="icon2 windowbg">
 						<img src="' . $settings['images_url'] . '/bugtracker/', $entry['status'] == 'wip' ? 'wip.gif' : $entry['status'] . '.png', '" alt="" />
-					</td>
+					</td>';
+					
+			// Entry name and description
+			echo '
 					<td class="subject windowbg2">
 						<div>
 							<span>
@@ -140,13 +168,18 @@ function template_TrackerViewProject()
 							</span>
 							<p>', $entry['shortdesc'], '</p>
 						</div>
-					</td>
+					</td>';
+					
+			// Status and type
+			echo '
 					<td class="stats windowbg">
 						<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $entry['status'], '">', $txt['status_' . $entry['status']], '</a>
 					</td>
 					<td class="stats windowbg2">
 						<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $entry['type'], '">', $txt['bugtracker_' . $entry['type']], '</a>
-					</td>
+					</td>';
+					
+			echo '
 				</tr>';
 		}
 		echo '

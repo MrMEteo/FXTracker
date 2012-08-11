@@ -171,26 +171,6 @@ function BugTrackerSubmitEdit()
 		'progress' => (int) $_POST['entry_progress'],
 		'id' => (int) $entry['id']
 	);
-	
-	// Uhh, type changed?
-	if ($fentry['type'] != $extra['type'])
-	{
-		// Okay, shouldn't be too advanced.
-		$decrease = $extra['type'] == 'feature' ? 'feature' : 'issue';
-		$increase = $extra['type'] == 'feature' ? 'issue' : 'feature';
-		
-		// Do it ffs!
-		$smcFunc['db_query']('', '
-			UPDATE {db_prefix}bugtracker_projects
-			SET
-				' . $decrease . 'num = ' . $decrease . 'num-1,
-				' . $increase . 'num = ' . $increase . 'num+1
-			WHERE id = {int:pid}',
-			array(
-				'pid' => $extra['project']
-			)
-		);
-	}
 
 	// Assuming we have everything ready now, update!
 	$smcFunc['db_query']('', '
@@ -294,6 +274,143 @@ function BugTrackerMarkEntry()
 	}
 	else
 		fatal_lang_error('entry_unable_mark');
+}
+
+function BugTrackerEditNote()
+{
+        // Need some stuff.
+        global $context, $smcFunc, $user_profile, $sourcedir, $txt, $scripturl;
+        
+        // Try to grab the note.
+        $result = $smcFunc['db_query']('', '
+                SELECT
+                        id, authorid, entryid,
+                        note, time_posted
+                FROM {db_prefix}bugtracker_notes
+                WHERE id = {int:id}',
+                array(
+                        'id' => $_GET['note']
+                )
+        );
+        
+        if ($smcFunc['db_num_rows']($result) == 0)
+                fatal_lang_error('note_no_exist');
+                
+        // Load the note itself
+        $data = $smcFunc['db_fetch_assoc']($result);
+        
+        // Are we allowed to edit this note?
+        if (allowedTo('bt_edit_note_any') || (allowedTo('bt_edit_note_own') && $data['authorid'] == $context['user']['id']))
+        {
+                loadMemberData($data['authorid']);
+                
+                // We want the default SMF WYSIWYG editor and Subs-Post.php to make stuff look SMF-ish.
+                require_once($sourcedir . '/Subs-Editor.php');
+                include($sourcedir . '/Subs-Post.php');
+                
+                // Do this...
+                un_preparsecode($data['note']);
+                
+                // Some settings for it...
+                $editorOptions = array(
+                        'id' => 'note_text',
+                        'value' => $data['note'],
+                        'height' => '175px',
+                        'width' => '100%',
+                        // XML preview.
+                        'preview_type' => 2,
+                );
+                create_control_richedit($editorOptions);
+        
+                // Store the ID. Might need it later on.
+                $context['post_box_name'] = $editorOptions['id'];
+                
+                // Okay, lets set it up.
+                $context['bugtracker']['note'] = array(
+                        'id' => $data['id'],
+                        'author' => $user_profile[$data['authorid']],
+                        'time' => $data['time_posted'],
+                        'note' => $data['note'],
+                );
+                
+                // Page title, too.
+                $context['page_title'] = $txt['edit_note'];
+                
+                // And built on the link tree.
+                $context['linktree'][] = array(
+                        'name' => $txt['edit_note'],
+                        'url' => $scripturl . '?action=bugtracker;sa=editnote;note=' . $data['id'],
+                );
+                
+                // And the sub-template...
+                loadTemplate('fxt/Notes');
+                $context['sub_template'] = 'TrackerEditNote';
+        }
+        else
+                fatal_lang_error('note_edit_notyours');
+}
+
+function BugTrackerEditNote2()
+{
+        global $context, $smcFunc, $sourcedir, $scripturl;
+        
+        // Okay. See if we have submitted the data!
+        if (!isset($_POST['is_fxt']) || $_POST['is_fxt'] != true)
+                fatal_lang_error('note_save_failed');
+                
+        // Missing some data? :S
+        if (empty($_POST['note_id']))
+                fatal_lang_error('note_save_failed');
+                
+        if (empty($_POST['note_text']))
+                fatal_lang_error('note_empty');
+                
+        // So we have submitted something. Grab the data to here.
+        $pnote = array(
+                'id' => $_POST['note_id'],
+                'text' => $_POST['note_text'],
+        );
+        
+        // Load the note data.
+        $result = $smcFunc['db_query']('', '
+                SELECT
+                        id, entryid, authorid
+                FROM {db_prefix}bugtracker_notes
+                WHERE id = {int:id}',
+                array(
+                        'id' => $pnote['id'],
+                )
+        );
+        
+        // No note? :(
+        if ($smcFunc['db_num_rows']($result) == 0)
+                fatal_lang_error('note_no_exist');
+                
+        // Then grab the note.
+        $tnote = $smcFunc['db_fetch_assoc']($result);
+        
+        // Not allowed to edit *this* note?
+        if (!allowedTo('bt_edit_note_any') && (allowedTo('bt_edit_note_own') && $context['user']['id'] != $tnote['authorid']))
+                fatal_lang_error('note_edit_notyours');
+        
+        // Need Subs-Post.php
+        include($sourcedir . '/Subs-Post.php');
+        
+        // Preparse the message.
+        preparsecode($smcFunc['htmlspecialchars']($pnote['text']));
+        
+        // And save it...
+        $smcFunc['db_query']('', '
+                UPDATE {db_prefix}bugtracker_notes
+                SET note = {string:note}
+                WHERE id = {int:id}',
+                array(
+                        'id' => $tnote['id'],
+                        'note' => $pnote['text'],
+                )
+        );
+        
+        redirectexit($scripturl . '?action=bugtracker;sa=view;entry=' . $tnote['entryid']);
 }
 
 ?>

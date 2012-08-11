@@ -166,27 +166,177 @@ function BugTrackerSubmitNewEntry()
 			$fentry['mark'],
 			$fentry['attention'],
 			$fentry['progress']
-		)
+		),
+		// No idea why I need this but oh well! :D
+		array()
 	);
 			
 	// Grab the ID of the entry just inserted.
 	$entryid = $smcFunc['db_insert_id']('{db_prefix}bugtracker_entries', 'id');
-
-	// What type is this again?
-	$type = $fentry['type'] == 'issue' ? 'issue' : 'feature'; // In case this gets changed later on!
-	
-	// Then update the count at the projects.
-	$smcFunc['db_query']('', '
-		UPDATE {db_prefix}bugtracker_projects
-		SET ' . $type . 'num=' . $type . 'num+1
-		WHERE id = {int:project}', 
-		array(
-			'project' => $fentry['project'],
-		)
-	);
 	
 	// Then we're ready to opt-out!
 	redirectexit($scripturl . '?action=bugtracker;sa=view;entry=' . $entryid . ';new');
+}
+
+function BugTrackerAddNote()
+{
+        global $context, $smcFunc, $sourcedir, $txt, $scripturl;
+        
+        // Is the entry set?
+        if (empty($_GET['entry']))
+                fatal_lang_error('entry_no_exist', false);
+        
+        // Grab this entry, check if it exists.
+        $result = $smcFunc['db_query']('', '
+                SELECT
+                        id, name, tracker
+                FROM {db_prefix}bugtracker_entries
+                WHERE id = {int:id}',
+                array(
+                        'id' => $_GET['entry'],
+                )
+        );
+        
+        // No entry? No note either!!
+        if ($smcFunc['db_num_rows']($result) == 0)
+                fatal_lang_error('entry_no_exists', false);
+                
+        // Data fetching, please.
+        $data = $smcFunc['db_fetch_assoc']($result);
+        
+        // Are we, like, allowed to add notes to any entry or just our own?
+        if (!allowedTo('bt_add_note_any') && (allowedTo('bt_add_note_own') && $context['user']['id'] != $data['tracker']))
+                fatal_lang_error('cannot_add_note', false);
+        
+        // Okay. Set up the $context variable.
+        $context['bugtracker']['note'] = array(
+                'id' => $data['id'],
+                'name' => $data['name'],
+        );
+        
+        // We want the default SMF WYSIWYG editor and Subs-Post.php to make stuff look SMF-ish.
+        require_once($sourcedir . '/Subs-Editor.php');
+                
+        // Some settings for it...
+        $editorOptions = array(
+                'id' => 'note_text',
+                'value' => '',
+                'height' => '175px',
+                'width' => '100%',
+                // XML preview.
+                'preview_type' => 2,
+        );
+        create_control_richedit($editorOptions);
+        
+        // Store the ID. Might need it later on.
+	$context['post_box_name'] = $editorOptions['id'];
+        
+        // Page title, too.
+        $context['page_title'] = $txt['add_note'];
+        
+        // And the linktree, of course.
+        $context['linktree'][] = array(
+                'name' => $txt['add_note'],
+                'url' => $scripturl . '?action=bugtracker;sa=addnote;entry=' . $data['id'],
+        );
+        
+        // Set the sub template.
+        loadTemplate('fxt/Notes');
+        $context['sub_template'] = 'TrackerAddNote';
+}
+
+function BugTrackerAddNote2()
+{
+        global $context, $smcFunc, $sourcedir, $scripturl, $txt;
+        
+        // Okay. See if we have submitted the data!
+        if (!isset($_POST['is_fxt']) || $_POST['is_fxt'] != true)
+                fatal_lang_error('note_save_failed');
+                
+	// Oh noes, no entry?
+	if (!isset($_POST['entry_id']) || empty($_POST['entry_id']))
+		fatal_lang_error('note_save_failed');
+                
+        // Description empty?
+        if (empty($_POST['note_text']))
+                fatal_lang_error('note_empty');
+                
+        $note = array(
+                'id' => $_POST['entry_id'],
+                'note' => $_POST['note_text'],
+        );
+                
+        // Try to load the entry.
+        $result = $smcFunc['db_query']('', '
+                SELECT
+                        id, name, tracker
+                FROM {db_prefix}bugtracker_entries
+                WHERE id = {int:id}',
+                array(
+                        'id' => $note['id'],
+                )
+        );
+        
+        // None? :(
+        if ($smcFunc['db_num_rows']($result) == 0)
+                fatal_lang_error('entry_no_exist');
+                
+        // Then, fetch the data.
+        $data = $smcFunc['db_fetch_assoc']($result);
+        
+        // Are we allowed to add notes to any entry or just our own?
+        if (!allowedTo('bt_add_note_any') && (allowedTo('bt_add_note_own') && $context['user']['id'] != $data['tracker']))
+                fatal_lang_error('cannot_add_note', false);
+                
+        // Need Subs-Post.php
+        include($sourcedir . '/Subs-Post.php');
+        
+        // Then, preparse the note.
+        preparsecode($smcFunc['htmlspecialchars']($note['note']));
+        
+        // And save!
+        $smcFunc['db_insert']('insert',
+		'{db_prefix}bugtracker_notes',
+		array(
+			'authorid' => 'int',
+			'entryid' => 'int',
+			'time_posted' => 'int',
+                        'note' => 'string'
+		),
+		array(
+			$context['user']['id'],
+			$note['id'],
+			time(),
+			$note['note']
+		),
+		// No idea why I need this but oh well! :D
+		array()
+	);
+        
+        // PM the author of the entry...if it wasn't him/her that posted it.
+        if ($context['user']['id'] != $data['tracker'])
+        {
+                $url1 = $scripturl . '?action=profile;u=' . $context['user']['id'];
+                $url2 = $scripturl . '?action=bugtracker;sa=view;entry=' . $note['id'];
+                $url3 = $url2 . '#note_' . $smcFunc['db_insert_id']('{db_prefix}bugtracker_notes', 'id');
+                sendpm(
+                        array(
+                              'bcc' => array(),
+                              'to' => array($data['tracker'])
+                        ),
+                        $txt['note_pm_subject'],
+                        sprintf($txt['note_pm_message'], $url1, $context['user']['name'], $url2, $url3),
+                        false,
+                        array(
+                              'id' => 0,
+                              'name' => $txt['note_pm_username'],
+                              'username' => $txt['note_pm_username']
+                        )
+                );
+        }
+        
+        // And done!
+        redirectexit($scripturl . '?action=bugtracker;sa=view;entry=' . $note['id']);
 }
 
 ?>

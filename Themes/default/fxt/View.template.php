@@ -20,17 +20,17 @@ function template_TrackerView()
 		</h3>
 	</div>';
 	
-	// As we don't have any comments yet... Remove this link!
-	/*
+	// Allow people to jump to the notes?
+	echo '
 	<div class="buttonlist floatleft">
 		<ul>
 			<li>
-				<a href="#comments">
-					<span>', $txt['go_comments'], '</span>
+				<a href="#notes">
+					<span>', $txt['go_notes'], '</span>
 				</a>
 			</li>
 		</ul>
-	</div>*/
+	</div>';
 	
 	echo '
 	<div class="buttonlist floatright">
@@ -57,12 +57,16 @@ function template_TrackerView()
 				<a onclick="return confirm(', javascriptescape($txt['really_delete']), ')" href="', $scripturl, '?action=bugtracker;sa=remove;entry=', $context['bugtracker']['entry']['id'], '"><span>', $txt['removeentry'], '</span></a>
 			</li>';
 
+	// Show the actual entry.
 	echo '
 		</ul>
 	</div>
 	<table class="fullwidth">
 		<tr>
-			<td style="width: 5%">
+			<td style="width: 5%">';
+			
+	// This is whatever data we have to show.
+	echo '
 				<div class="plainbox righttext">
 					<strong>', $txt['title'], ':</strong><br />
 					<strong>', $txt['type'], ':</strong><br />
@@ -70,9 +74,15 @@ function template_TrackerView()
 					<strong>', $txt['status'], ':</strong><br />
 					<strong>', $txt['project'], ':</strong><br />
 					', $context['bugtracker']['entry']['status'] == 'wip' ? '<strong>' . $txt['progress'] . '</strong><br />' : '', '
-				</div>
+				</div>';
+				
+	// Continue with our table...
+	echo '
 			</td>
-			<td style="width: 95%">
+			<td style="width: 95%">';
+			
+	// And this is the actual data!
+	echo '
 				<div class="plainbox">
 					', $context['bugtracker']['entry']['name'], '<br />
 
@@ -85,10 +95,16 @@ function template_TrackerView()
 					<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $context['bugtracker']['entry']['project']['id'], '">', $context['bugtracker']['entry']['project']['name'], '</a><br />
 
 					', $context['bugtracker']['entry']['status'] == 'wip' ? $context['bugtracker']['entry']['progress'] . '<br />' : '', '
-				</div>
+				</div>';
+				
+	// Enough table -- Stop it.
+	echo '
 			</td>
 		</tr>
-	</table>
+	</table>';
+	
+	// Entry description...
+	echo '
 	<div class="cat_bar">
 		<h3 class="catbg">
 			<img class="icon" src="', $settings['images_url'], '/bugtracker/description.png" alt="" />
@@ -110,6 +126,7 @@ function template_TrackerView()
 
 	<div class="buttonlist floatright">
 		<ul>';
+		
 		// Mark as unassigned/new?
 		if ($context['can_bt_mark_new_any'] || $context['can_bt_mark_new_own'])
 			echo '
@@ -118,6 +135,7 @@ function template_TrackerView()
 					<span>', $txt['mark_new'], '</span>
 				</a>
 			</li>';
+			
 		// Or as Work In Progress?
 		if ($context['can_bt_mark_wip_any'] || $context['can_bt_mark_wip_own'])
 			echo '
@@ -126,6 +144,7 @@ function template_TrackerView()
 					<span>', $txt['mark_wip'], '</span>
 				</a>
 			</li>';
+			
 		// Mark as Resolved?
 		if ($context['can_bt_mark_done_any'] || $context['can_bt_mark_done_own'])
 			echo '
@@ -134,6 +153,7 @@ function template_TrackerView()
 					<span>', $txt['mark_done'], '</span>
 				</a>
 			</li>';
+			
 		// Then as Rejected?
 		if ($context['can_bt_mark_reject_any'] || $context['can_bt_mark_reject_own'])
 			echo '
@@ -160,6 +180,7 @@ function template_TrackerView()
 		</ul>
 	</div>';
 	
+	// The Notes of this entry...
 	echo '
 	<br class="clear" /><br />
 	
@@ -172,6 +193,7 @@ function template_TrackerView()
 	// Are we allowed to add notes? :D
 	if ($context['can_bt_add_note_any'] || $context['can_bt_add_note_own'])
 		echo '
+	<a name="notes"></a>
 	<div class="buttonlist">
 		<ul>
 			<li>
@@ -180,15 +202,18 @@ function template_TrackerView()
 				</a>
 			</li>
 		</ul>
-	</div><br />';
+	</div><br class="clear" />';
 		
-	
+	// Do we have any notes?
 	if (!empty($context['bugtracker']['entry']['notes']))
 	{
 		foreach ($context['bugtracker']['entry']['notes'] as $note)
 		{
+			// Start the note.
 			echo '
 	<div class="plainbox">';
+	
+			// Build the array of buttons.
 			$buttons = array();
 			
 			// Edit it?
@@ -199,17 +224,21 @@ function template_TrackerView()
 			if (allowedTo('bt_remove_note_any') || (allowedTo('bt_remove_note_own') && $context['user']['id'] == $note['user']['id_member']))
 				$buttons[] = '<a onclick="return confirm(' . javascriptescape($txt['really_delete_note']) . ')" href="' . $scripturl . '?action=bugtracker;sa=removenote;note=' . $note['id'] . '">' . $txt['remove_note'] . '</a>';
 			
+			// If we have buttons, show them.
 			if (!empty($buttons))
 				echo '<div class="floatright">' . implode(' | ', $buttons) . '</div>';
 			
+			// Then show the note itself.
 			echo '
-		', sprintf($txt['note_by'], $note['user']['member_name'], date('d-m-Y H:i:s', $note['time']), $scripturl . '?action=profile;u=' . $note['user']['id_member']), '
+		<a name="note_', $note['id'], '"></a>
+		', sprintf($txt['note_by'], $note['user']['member_name'], $note['time'], $scripturl . '?action=profile;u=' . $note['user']['id_member']), '</a>
 		<hr />
 		', $note['text'], '
 	</div>';
 		
 		}
 	}
+	// Aww, we have no notes?
 	else
 		echo '
 	<div class="plainbox centertext">

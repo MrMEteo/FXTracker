@@ -22,21 +22,33 @@ function template_TrackerEditNote()
         echo '
         <div class="windowbg">
                 <span class="topslice"><span></span></span>
-                <div class="fullpadding">
+                <div class="fullpadding">';
+                
+        // And then show the WYSIWYG editor.
+        echo '
                         <div id="bbcBox_message"></div>
 			<div id="smileyBox_message"></div>', 
-                        template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message'), '<br />
+                        template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message'), '<br />';
+                        
+        // Some more form crap...
+        echo '
                         <input type="hidden" name="note_id" value="', $context['bugtracker']['note']['id'], '" />
                         <input type="hidden" name="is_fxt" value="true" />
-                        <input type="submit" value="', $txt['entry_submit'], '" />
+                        <input type="submit" value="', $txt['entry_submit'], '" />';
+                        
+        // And show some information about the note being edited.
+        echo '
                         <div class="floatright">
                                 ', sprintf(
                                         $txt['note_by'],
                                         $context['bugtracker']['note']['author']['member_name'],
-                                        date('d-m-Y H:i:s', $context['bugtracker']['note']['time']),
+                                        timeformat($context['bugtracker']['note']['time']),
                                         $scripturl . '?action=profile;u=' . $context['bugtracker']['note']['author']['id_member']
                                 ), '
-                        </div>
+                        </div>';
+                
+        // Then close the roundframe.
+        echo '
                 </div>
                 <span class="botslice"><span></span></span>
         </div>';
@@ -68,18 +80,27 @@ function template_TrackerAddNote()
         echo '
         <div class="windowbg">
                 <span class="topslice"><span></span></span>
-                <div class="fullpadding">
+                <div class="fullpadding">';
+                
+        // Show WYSIWYG
+        echo '
                         <div id="bbcBox_message"></div>
 			<div id="smileyBox_message"></div>', 
-                        template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message'), '<br />
+                        template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message'), '<br />';
+                        
+        // Form.
+        echo '
                         <input type="hidden" name="entry_id" value="', $context['bugtracker']['note']['id'], '" />
                         <input type="hidden" name="is_fxt" value="true" />
-                        <input type="submit" value="', $txt['entry_submit'], '" />
+                        <input type="submit" value="', $txt['entry_submit'], '" />';
+                        
+        // And close the roundframe.
+        echo '
                 </div>
                 <span class="botslice"><span></span></span>
         </div>';
         
-        // And close our form.
+        // And form.
         echo '
         </form>
         <br class="clear" />';

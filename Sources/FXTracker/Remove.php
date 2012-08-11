@@ -58,4 +58,46 @@ function BugTrackerRemoveEntry()
 		fatal_lang_error('remove_entry_noaccess', false);
 }
 
+function BugTrackerRemoveNote()
+{
+        global $smcFunc, $context, $scripturl;
+    
+        // Try to grab the note...
+        $result = $smcFunc['db_query']('', '
+                SELECT
+                        id, authorid, entryid
+                FROM {db_prefix}bugtracker_notes
+                WHERE id = {int:noteid}',
+                array(
+                        'noteid' => $_GET['note'],
+                )
+        );
+        
+        // None? That sucks...
+        if ($smcFunc['db_num_rows']($result) == 0)
+                fatal_lang_error('note_delete_failed');
+                
+        // Check if we can remove it -- wait, we need the data for that.
+        $note = $smcFunc['db_fetch_assoc']($result);
+        
+        // Check if we can remove it, now.
+        if (allowedTo('bt_remove_note_any') || (allowedTo('bt_remove_note_own') && $context['user']['id'] == $note['authorid']))
+        {
+                // Say bye to your note... *sniff*
+                $smcFunc['db_query']('', '
+                        DELETE
+                                FROM {db_prefix}bugtracker_notes
+                        WHERE id = {int:id}',
+                        array(
+                                'id' => $note['id'],
+                        )
+                );
+                
+                // And redirect back to the entry.
+                redirectexit($scripturl . '?action=bugtracker;sa=view;entry=' . $note['entryid']);
+        }
+        else
+                fatal_lang_error('note_delete_notyours');
+}
+
 ?>

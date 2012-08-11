@@ -39,9 +39,12 @@ function fxt_permissions(&$permissionGroups, &$permissionList)
 	$permissionList['membergroup']['bt_mark_reject_own'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bt_mark_attention_any'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bt_mark_attention_own'] = array(false, 'fxt_classic', 'fxt_simple');
-	/*$permissionList['membergroup']['bugtracker_view'] = array(false, 'fxt_classic', 'fxt_simple');
-	$permissionList['membergroup']['bugtracker_view'] = array(false, 'fxt_classic', 'fxt_simple');
-	$permissionList['membergroup']['bugtracker_view'] = array(false, 'fxt_classic', 'fxt_simple');*/
+	$permissionList['membergroup']['bt_add_note_any'] = array(false, 'fxt_classic', 'fxt_simple');
+	$permissionList['membergroup']['bt_add_note_own'] = array(false, 'fxt_classic', 'fxt_simple');
+	$permissionList['membergroup']['bt_edit_note_any'] = array(false, 'fxt_classic', 'fxt_simple');
+	$permissionList['membergroup']['bt_edit_note_own'] = array(false, 'fxt_classic', 'fxt_simple');
+	$permissionList['membergroup']['bt_remove_note_any'] = array(false, 'fxt_classic', 'fxt_simple');
+	$permissionList['membergroup']['bt_remove_note_own'] = array(false, 'fxt_classic', 'fxt_simple');
 }
 
 function fxt_menubutton(&$menu_buttons)

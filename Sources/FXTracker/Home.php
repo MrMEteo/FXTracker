@@ -5,10 +5,14 @@
 function BugTrackerHome()
 {
 	// Global some stuff
-	global $smcFunc, $context, $user_info, $user_profile, $txt;
+	global $smcFunc, $context, $user_info, $user_profile, $txt, $sourcedir;
 	
 	// Load our Home template.
 	loadTemplate('fxt/Home');
+	
+	// Load entryfuncs.php
+	include($sourcedir . '/FXTracker/EntryFuncs.php');
+	grabEntries(array('none', 'desc'));
 
 	// Set the page title.
 	$context['page_title'] = $txt['bugtracker_index'];
@@ -28,8 +32,8 @@ function BugTrackerHome()
 			'id' => $project['id'],
 			'name' => $project['name'],
 			'num' => array(
-				'issues' => (int) $project['issuenum'],
-				'features' => (int) $project['featurenum'],
+				'issues' => 0,
+				'features' => 0,
 			),
 			'description' => parse_bbc($project['description']),
 			'entries' => array(),
@@ -48,7 +52,8 @@ function BugTrackerHome()
 			status, attention, progress
 
 		FROM {db_prefix}bugtracker_entries
-		' . $where
+		' . $where . '
+		ORDER BY id DESC'
 	);
 
 	// If we have zero or less(?), don't bother fetching them. 
@@ -56,6 +61,12 @@ function BugTrackerHome()
 	$context['bugtracker']['feature'] = array();
 	$context['bugtracker']['issue'] = array();
 	$context['bugtracker']['attention'] = array();
+	
+	// Latest stuff
+	$lnum_features = 0;
+	$lnum_issues = 0;
+	$latest_features = array();
+	$latest_issues = array();
 	while ($entry = $smcFunc['db_fetch_assoc']($request))
 	{
 		// Then we're ready for some action.
@@ -73,10 +84,6 @@ function BugTrackerHome()
 			'progress' => (empty($entry['progress']) ? '0' : $entry['progress']) . '%'
 		);
 
-		$pid = $entry['project'];
-		if (array_key_exists($pid, $context['bugtracker']['projects']))
-			$context['bugtracker']['entries'][$entry['id']]['project'] = $context['bugtracker']['projects'][$pid];
-
 		// Also create a list of issues and features!
 		$context['bugtracker'][$entry['type']][] = $context['bugtracker']['entries'][$entry['id']];
 
@@ -84,20 +91,42 @@ function BugTrackerHome()
 		if ($entry['attention'])
 			$context['bugtracker']['attention'][] = $context['bugtracker']['entries'][$entry['id']];
 			
-		// Is this entry solved, maybe?
-		if ($entry['status'] == 'done')
+		// What kind of entry is this?
+		switch ($entry['type'])
 		{
-			$type_dec = $entry['type'] == 'issue' ? 'issues' : 'features';
-			$context['bugtracker']['projects'][$pid]['num'][$type_dec] - 1;
+			case 'issue':
+				if ($lnum_issues < 5 && !in_array($entry['status'], array('done', 'reject')))
+				{
+					$latest_issues[] = $context['bugtracker']['entries'][$entry['id']];
+					$lnum_issues++;
+				}
+				if (array_key_exists($entry['project'], $context['bugtracker']['projects']) && !in_array($entry['status'], array('done', 'reject')))
+					$context['bugtracker']['projects'][$entry['project']]['num']['issues']++;
+				
+				break;
+			
+			case 'feature':
+				if ($lnum_features < 5 && !in_array($entry['status'], array('done', 'reject')))
+				{
+					$latest_features[] = $context['bugtracker']['entries'][$entry['id']];
+					$lnum_features++;
+				}
+				if (array_key_exists($entry['project'], $context['bugtracker']['projects']) && !in_array($entry['status'], array('done', 'reject')))
+					$context['bugtracker']['projects'][$entry['project']]['num']['features']++;
+				
+				break;
 		}
+		
+		if (array_key_exists($entry['project'], $context['bugtracker']['projects']))
+			$context['bugtracker']['entries'][$entry['id']]['project'] = $context['bugtracker']['projects'][$entry['project']];
 	}
 
 	// Clean up.
 	$smcFunc['db_free_result']($request);
 
 	// Put the last 5 entries of each category in a new array.
-	$context['bugtracker']['latest']['issues'] = array_reverse(array_slice($context['bugtracker']['issue'], -5));
-	$context['bugtracker']['latest']['features'] = array_reverse(array_slice($context['bugtracker']['feature'], -5));
+	$context['bugtracker']['latest']['issues'] = $latest_issues;
+	$context['bugtracker']['latest']['features'] = $latest_features;
 
 	// What's our template, doc?
 	$context['sub_template'] = 'TrackerHome';

@@ -17,14 +17,18 @@ function BugTrackerMain()
 	isAllowedTo('bugtracker_view');
 
 	// A list of all actions we can take.
-	// 'action' => 'bug tracker function',
+	// 'action' => array('source file', 'bug tracker function'),
 	$sactions = array(
+		'addnote' => array('Add', 'AddNote'),
+		'addnote2' => array('Add', 'AddNote2'),
 		'admin' => array('Admin', 'Admin'),
 		
 		'credits' => array('Credits', 'Credits'),
 
 		'edit' => array('Edit', 'Edit'),
 		'edit2' => array('Edit', 'SubmitEdit'),
+		'editnote' => array('Edit', 'EditNote'),
+		'editnote2' => array('Edit', 'EditNote2'),
 
 		'home' => array('Home', 'Home'),
 
@@ -36,6 +40,8 @@ function BugTrackerMain()
 		'projectindex' => array('View', 'ViewProject'),
 
 		'remove' => array('Remove', 'RemoveEntry'),
+		
+		'removenote' => array('Remove', 'RemoveNote'),
 
 		'maintenance' => array('Maintenance', 'Maintenance'),
 		'maintenance2' => array('Maintenance', 'PerformMaintenance'),
