@@ -25,8 +25,6 @@ function fxt_permissions(&$permissionGroups, &$permissionList)
 	$permissionList['membergroup']['bt_edit_own'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bt_remove_any'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bt_remove_own'] = array(false, 'fxt_classic', 'fxt_simple');
-	$permissionList['membergroup']['bt_reply_any'] = array(false, 'fxt_classic', 'fxt_simple');
-	$permissionList['membergroup']['bt_reply_own'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bt_mark_any'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bt_mark_own'] = array(false, 'fxt_classic', 'fxt_simple');
 	$permissionList['membergroup']['bt_mark_new_any'] = array(false, 'fxt_classic', 'fxt_simple');

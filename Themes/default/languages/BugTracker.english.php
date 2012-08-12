@@ -116,6 +116,7 @@ $txt['add_note'] = 'Add note';
 $txt['no_notes'] = 'There are no notes to display.';
 $txt['cannot_add_note'] = 'You cannot add a note to this entry.';
 $txt['note_empty'] = 'You didn\'t enter a note!';
+$txt['quick_note'] = 'Quick Note';
 
 $txt['note_pm_subject'] = 'A note has been added to your entry!';
 $txt['note_pm_message'] = 'This is a notification to let you know that user [url=%1$s][b]%2$s[/b][/url] has posted a new note to your entry.
@@ -137,8 +138,6 @@ $txt['permissionname_bt_edit_any'] = 'Edit any entry';
 $txt['permissionname_bt_edit_own'] = 'Edit own entry';
 $txt['permissionname_bt_remove_any'] = 'Remove any entry';
 $txt['permissionname_bt_remove_own'] = 'Remove own entry';
-$txt['permissionname_bt_reply_any'] = 'Reply to any entry';
-$txt['permissionname_bt_reply_own'] = 'Reply to own entry';
 $txt['permissionname_bt_mark_any'] = 'Mark any entry (master permission for marking)';
 $txt['permissionname_bt_mark_own'] = 'Mark own entry (master permission for marking)';
 $txt['permissionname_bt_mark_new_any'] = 'Mark any entry as new';

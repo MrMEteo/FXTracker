@@ -99,7 +99,7 @@ function BugTrackerView()
 	);
 
 	// Setup permissions... Not just one of them!
-        $own_any = array('mark', 'mark_new', 'mark_wip', 'mark_done', 'mark_reject', 'mark_attention', 'reply', 'edit', 'remove', 'remove_note', 'edit_note', 'add_note');
+        $own_any = array('mark', 'mark_new', 'mark_wip', 'mark_done', 'mark_reject', 'mark_attention', 'edit', 'remove', 'remove_note', 'edit_note', 'add_note');
         $is_own = $context['user']['id'] == $data['tracker'];
         foreach ($own_any as $perm)
         {

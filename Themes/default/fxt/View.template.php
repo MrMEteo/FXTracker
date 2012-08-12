@@ -37,24 +37,30 @@ function template_TrackerView()
 		<ul>';
 
 	// Are we allowed to reply to this entry? Remove the "false" check on here to make the button appear like normal, done like this because comments haven't been implemented yet.
-	if (false || $context['can_bt_reply_any'] || $context['can_bt_reply_own'])
+	if (false || $context['can_bt_add_note_any'] || $context['can_bt_add_note_own'])
 		echo '
 			<li>
-				<a class="active" href="', $scripturl, '?action=bugtracker;sa=reply;entry=', $context['bugtracker']['entry']['id'], '"><span>', $txt['reply'], '</span></a>
+				<a class="active" href="', $scripturl, '?action=bugtracker;sa=addnote;entry=', $context['bugtracker']['entry']['id'], '">
+					<span>', $txt['add_note'], '</span>
+				</a>
 			</li>';
 	
 	// Are we allowed to edit this entry?
 	if ($context['can_bt_edit_any'] || $context['can_bt_edit_own'])
 		echo '
 			<li>
-				<a href="', $scripturl, '?action=bugtracker;sa=edit;entry=', $context['bugtracker']['entry']['id'], '"><span>', $txt['editentry'], '</span></a>
+				<a href="', $scripturl, '?action=bugtracker;sa=edit;entry=', $context['bugtracker']['entry']['id'], '">
+					<span>', $txt['editentry'], '</span>
+				</a>
 			</li>';
 
 	// Or allowed to remove it?
 	if ($context['can_bt_remove_any'] || $context['can_bt_remove_own'])
 		echo '
 			<li>
-				<a onclick="return confirm(', javascriptescape($txt['really_delete']), ')" href="', $scripturl, '?action=bugtracker;sa=remove;entry=', $context['bugtracker']['entry']['id'], '"><span>', $txt['removeentry'], '</span></a>
+				<a onclick="return confirm(', javascriptescape($txt['really_delete']), ')" href="', $scripturl, '?action=bugtracker;sa=remove;entry=', $context['bugtracker']['entry']['id'], '">
+					<span>', $txt['removeentry'], '</span>
+				</a>
 			</li>';
 
 	// Show the actual entry.
@@ -189,20 +195,6 @@ function template_TrackerView()
 			', $txt['notes'], '
 		</h3>
 	</div>';
-	
-	// Are we allowed to add notes? :D
-	if ($context['can_bt_add_note_any'] || $context['can_bt_add_note_own'])
-		echo '
-	<a name="notes"></a>
-	<div class="buttonlist">
-		<ul>
-			<li>
-				<a class="active" href="', $scripturl, '?action=bugtracker;sa=addnote;entry=', $context['bugtracker']['entry']['id'], '">
-					<span>', $txt['add_note'], '</span>
-				</a>
-			</li>
-		</ul>
-	</div><br class="clear" />';
 		
 	// Do we have any notes?
 	if (!empty($context['bugtracker']['entry']['notes']))
@@ -217,16 +209,19 @@ function template_TrackerView()
 			$buttons = array();
 			
 			// Edit it?
-			if (allowedTo('bt_edit_note_any') || (allowedTo('bt_edit_note_own') && $context['user']['id'] == $note['user']['id_member']))
+			if ($context['can_bt_edit_note_any'] || $context['can_bt_edit_note_own'])
 				$buttons[] = '<a href="' . $scripturl . '?action=bugtracker;sa=editnote;note=' . $note['id'] . '">' . $txt['edit_note'] . '</a>';
 		
 			// Can we remove this note?
-			if (allowedTo('bt_remove_note_any') || (allowedTo('bt_remove_note_own') && $context['user']['id'] == $note['user']['id_member']))
+			if ($context['can_bt_remove_note_any'] || $context['can_bt_remove_note_own'])
 				$buttons[] = '<a onclick="return confirm(' . javascriptescape($txt['really_delete_note']) . ')" href="' . $scripturl . '?action=bugtracker;sa=removenote;note=' . $note['id'] . '">' . $txt['remove_note'] . '</a>';
 			
 			// If we have buttons, show them.
 			if (!empty($buttons))
-				echo '<div class="floatright">' . implode(' | ', $buttons) . '</div>';
+				echo '
+		<div class="floatright">
+			' . implode(' | ', $buttons) . '
+		</div>';
 			
 			// Then show the note itself.
 			echo '
@@ -243,6 +238,31 @@ function template_TrackerView()
 		echo '
 	<div class="plainbox centertext">
 		<strong>', $txt['no_notes'], '</strong>
+	</div>';
+	
+	// Show Quick Note, if we can.
+	if ($context['can_bt_add_note_any'] || $context['can_bt_add_note_own'])
+		echo '
+	<div id="quickReplyOptions">
+	<form action="', $scripturl, '?action=bugtracker;sa=addnote2" method="post">
+		<input type="hidden" name="entry_id" value="', $context['bugtracker']['entry']['id'], '" />
+                <input type="hidden" name="is_fxt" value="true" />
+		<div class="cat_bar">
+			<h3 class="catbg">
+				', $txt['quick_note'], '
+			</h3>
+		</div>
+		<span class="upperframe"><span></span></span>
+		<div class="roundframe">	
+			<div class="quickReplyContent">
+				<textarea cols="600" rows="7" tabindex="1" name="note_text"></textarea>
+			</div>
+			<div class="righttext padding">
+				<input type="submit" value="', $txt['entry_submit'], '" class="button_submit" />
+			</div>
+		</div>
+		<span class="lowerframe"><span></span></span>
+	</form>
 	</div>';
 	
 	echo '

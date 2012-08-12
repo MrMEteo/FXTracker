@@ -9,6 +9,12 @@
 {
 	width: 100%;
 }
+
+/* (a)lmost (full width) :D */
+.afullwidth
+{
+	width: 99.5%;
+}
 .halfwidth
 {
 	width: 50%;
@@ -16,7 +22,7 @@
 
 .fullpadding
 {
-	padding: 10px;
+	padding: 10px 10px 10px 10px;
 }
 
 .halfpadding

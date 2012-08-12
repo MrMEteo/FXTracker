@@ -50,6 +50,15 @@ function BugTrackerRemoveEntry()
 				'pid' => $data['project'],
 			)
 		);
+                
+                // Also remove any notes left for this entry.
+                $smcFunc['db_query']('', '
+                        DELETE FROM {db_prefix}bugtracker_notes
+                        WHERE entryid = {int:entry}',
+                        array(
+                              'entry' => $data['id']
+                        )
+                );
 		
 		// And redirect back to the project index.
 		redirectexit($scripturl . '?action=bugtracker;sa=projectindex;project=' . $data['project']);
