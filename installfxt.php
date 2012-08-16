@@ -13,6 +13,8 @@ if (SMF == 'SSI')
 add_integration_function('integrate_pre_include', '$sourcedir/Bugtracker-Hooks.php', true);
 add_integration_function('integrate_actions', 'fxt_actions', true);
 add_integration_function('integrate_load_permissions', 'fxt_permissions', true);
+add_integration_function('integrate_menu_buttons', 'fxt_menubutton', true);
+add_integration_function('integrate_admin_areas', 'fxt_adminareas', true);
 
 // Outside SMF?
 if (!defined('SMF'))
