@@ -37,6 +37,8 @@ $txt['view_all_lc'] = 'view all';
 $txt['view_all'] = 'View all of kind "%s"';
 $txt['tracked_by_guest'] = 'Tracked by Guest on %s';
 $txt['tracked_by_user'] = 'Tracked by <a href="%2$s">%3$s</a> on %1$s';
+$txt['tracked_by_guest_notime'] = 'Tracked by Guest';
+$txt['tracked_by_user_notime'] = 'Tracked by <a href="%1$s">%2$s</a>';
 
 $txt['bt_acp_button'] = 'FXTracker';
 $txt['bt_acp_projects'] = 'Manage Projects';
