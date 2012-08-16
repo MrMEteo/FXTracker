@@ -71,7 +71,7 @@ function viewGetEntries($start, $items_per_page, $sort, $where = '', $hideReject
 				
 				break;
 		}
-		$attention = $entry['attention'] ? '<img src="' . $settings['images_url'] . '/bugtracker/attention.png" alt="" /> <span class="iconslash">/<span> ' : '';
+		$attention = $entry['attention'] ? '<img src="' . $settings['images_url'] . '/bugtracker/attention.png" alt="" />' : '';
 		$statusimgsrc = $attention . '<img src="' . $settings['images_url'] . '/bugtracker/' . $statusimg . '" alt="" />';
 		
 		if (array_key_exists($entry['project'], $context['bugtracker']['projects']))
@@ -88,7 +88,7 @@ function viewGetEntries($start, $items_per_page, $sort, $where = '', $hideReject
 			'statusimg' => $statusimgsrc,
 			'name' => '
 			<a href="' . $scripturl . '?action=bugtracker;sa=view;entry=' . $entry['id'] . '">
-				' . $entry['name'] . ' ' . ($entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . ')</span>' : '') . '
+				' . $entry['name'] . ' ' . ($entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . '%)</span>' : '') . '
 			</a>
 			<div class="smalltext">
 				' . ($user_profile[$entry['tracker']]['id_member'] == 0 ? sprintf($txt['tracked_by_guest'], timeformat($entry['startedon'])) : sprintf($txt['tracked_by_user'], timeformat($entry['startedon']), $user_link, $user_profile[$entry['tracker']]['member_name'])) . '
@@ -226,7 +226,7 @@ function viewGetImportant($start, $items_per_page, $sort, $where = '')
 			'statusimg' => $statusimgsrc,
 			'name' => '
 			<a href="' . $scripturl . '?action=bugtracker;sa=view;entry=' . $entry['id'] . '">
-				' . $entry['name'] . ' ' . ($entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . ')</span>' : '') . '
+				' . $entry['name'] . ' ' . ($entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . '%)</span>' : '') . '
 			</a>
 			<div class="smalltext">
 				' . ($user_profile[$entry['tracker']]['id_member'] == 0 ? sprintf($txt['tracked_by_guest'], timeformat($entry['startedon'])) : sprintf($txt['tracked_by_user'], timeformat($entry['startedon']), $user_link, $user_profile[$entry['tracker']]['member_name'])) . '
@@ -339,6 +339,7 @@ function createListOptionsNormal($basehref, $where = '', $hideRejectClosed = tru
 				'data' => array(
 					'db' => 'id',
 					'class' => 'centertext',
+					'style' => 'width: 10px', // No more!
 				),
 				'sort' => array(
 					'default' => 'id ASC',
@@ -352,6 +353,7 @@ function createListOptionsNormal($basehref, $where = '', $hideRejectClosed = tru
 				'data' => array(
 					'db' => 'typeimg',
 					'class' => 'centertext',
+					'style' => 'width: 2%',
 				),
 			),
 			'statusimg' => array(
@@ -361,6 +363,7 @@ function createListOptionsNormal($basehref, $where = '', $hideRejectClosed = tru
 				'data' => array(
 					'db' => 'statusimg',
 					'class' => 'centertext',
+					'style' => 'width:2%', // Else the attention icon won't look good
 				),
 			),
 			'name' => array(
@@ -383,7 +386,6 @@ function createListOptionsNormal($basehref, $where = '', $hideRejectClosed = tru
                                 'data' => array(
                                         'db' => 'statusurl',
 					'class' => 'centertext',
-					'style' => 'width: 18%',
                                 ),
 				'sort' => array(
 					'default' => 'status ASC',
@@ -397,7 +399,6 @@ function createListOptionsNormal($basehref, $where = '', $hideRejectClosed = tru
 				'data' => array(
 					'db' => 'typeurl',
 					'class' => 'centertext',
-					'style' => 'width: 18%',
 				),
 				'sort' => array(
 					'default' => 'type ASC',
@@ -411,7 +412,6 @@ function createListOptionsNormal($basehref, $where = '', $hideRejectClosed = tru
 				'data' => array(
 					'db' => 'projecturl',
 					'class' => 'centertext',
-					'style' => 'width: 16%',
 				),
 				'sort' => array(
 					'default' => 'project ASC',
@@ -457,6 +457,7 @@ function createListOptionsImportant($basehref, $where = '')
 				'data' => array(
 					'db' => 'id',
 					'class' => 'centertext',
+					'style' => 'width: 10px', // No more!
 				),
 				'sort' => array(
 					'default' => 'id ASC',
@@ -470,6 +471,7 @@ function createListOptionsImportant($basehref, $where = '')
 				'data' => array(
 					'db' => 'typeimg',
 					'class' => 'centertext',
+					'style' => 'width: 2%',
 				),
 			),
 			'statusimg' => array(
@@ -479,6 +481,7 @@ function createListOptionsImportant($basehref, $where = '')
 				'data' => array(
 					'db' => 'statusimg',
 					'class' => 'centertext',
+					'style' => 'width:2%', // Else the attention icon won't look good
 				),
 			),
 			'name' => array(
@@ -501,7 +504,6 @@ function createListOptionsImportant($basehref, $where = '')
                                 'data' => array(
                                         'db' => 'statusurl',
 					'class' => 'centertext',
-					'style' => 'width: 18%',
                                 ),
 				'sort' => array(
 					'default' => 'status ASC',
@@ -515,7 +517,6 @@ function createListOptionsImportant($basehref, $where = '')
 				'data' => array(
 					'db' => 'typeurl',
 					'class' => 'centertext',
-					'style' => 'width: 18%',
 				),
 				'sort' => array(
 					'default' => 'type ASC',
@@ -529,7 +530,6 @@ function createListOptionsImportant($basehref, $where = '')
 				'data' => array(
 					'db' => 'projecturl',
 					'class' => 'centertext',
-					'style' => 'width: 16%',
 				),
 				'sort' => array(
 					'default' => 'project ASC',
