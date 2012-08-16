@@ -81,6 +81,18 @@ function viewGetEntries($start, $items_per_page, $sort, $where = '', $hideReject
 			</a>';
 		else
 			$projecturl = $txt['na'];
+			
+		if ($entry['startedon'] == 2012)
+			if ($user_profile[$entry['tracker']]['id_member'] == 0)
+				$nametext = $txt['tracked_by_guest_notime'];
+			else
+				$nametext = sprintf($txt['tracked_by_user_notime'], $user_link, $user_profile[$entry['tracker']]['member_name']);
+		else
+			if ($user_profile[$entry['tracker']]['id_member'] == 0)
+				$nametext = sprintf($txt['tracked_by_guest'], timeformat($entry['startedon']));
+			else
+				$nametext = sprintf($txt['tracked_by_user'], timeformat($entry['startedon']), $user_link, $user_profile[$entry['tracker']]['member_name']);
+			
 		
 		$important_entries[] = array(
 			'id' => $entry['id'],
@@ -91,7 +103,7 @@ function viewGetEntries($start, $items_per_page, $sort, $where = '', $hideReject
 				' . $entry['name'] . ' ' . ($entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . '%)</span>' : '') . '
 			</a>
 			<div class="smalltext">
-				' . ($user_profile[$entry['tracker']]['id_member'] == 0 ? sprintf($txt['tracked_by_guest'], timeformat($entry['startedon'])) : sprintf($txt['tracked_by_user'], timeformat($entry['startedon']), $user_link, $user_profile[$entry['tracker']]['member_name'])) . '
+				' . $nametext . '
 			</div>',
 			
 			'statusurl' => '
@@ -219,6 +231,17 @@ function viewGetImportant($start, $items_per_page, $sort, $where = '')
 			</a>';
 		else
 			$projecturl = $txt['na'];
+			
+		if ($entry['startedon'] == 2012)
+			if ($user_profile[$entry['tracker']]['id_member'] == 0)
+				$nametext = $txt['tracked_by_guest_notime'];
+			else
+				$nametext = sprintf($txt['tracked_by_user_notime'], $user_link, $user_profile[$entry['tracker']]['member_name']);
+		else
+			if ($user_profile[$entry['tracker']]['id_member'] == 0)
+				$nametext = sprintf($txt['tracked_by_guest'], timeformat($entry['startedon']));
+			else
+				$nametext = sprintf($txt['tracked_by_user'], timeformat($entry['startedon']), $user_link, $user_profile[$entry['tracker']]['member_name']);
 		
 		$important_entries[] = array(
 			'id' => $entry['id'],
@@ -229,7 +252,7 @@ function viewGetImportant($start, $items_per_page, $sort, $where = '')
 				' . $entry['name'] . ' ' . ($entry['status'] == 'wip' ? '<span class="smalltext" style="color:#E00000">(' . $entry['progress'] . '%)</span>' : '') . '
 			</a>
 			<div class="smalltext">
-				' . ($user_profile[$entry['tracker']]['id_member'] == 0 ? sprintf($txt['tracked_by_guest'], timeformat($entry['startedon'])) : sprintf($txt['tracked_by_user'], timeformat($entry['startedon']), $user_link, $user_profile[$entry['tracker']]['member_name'])) . '
+				' . $nametext . '
 			</div>',
 			
 			'statusurl' => '
