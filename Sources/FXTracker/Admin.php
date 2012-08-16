@@ -4,5 +4,8 @@
 
 function BugTrackerAdmin()
 {
-
+        // Need this
+        global $context, $smcFunc;
+        
+        
 }

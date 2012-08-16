@@ -47,18 +47,50 @@ function fxt_permissions(&$permissionGroups, &$permissionList)
 
 function fxt_menubutton(&$menu_buttons)
 {
-    global $txt, $scripturl;
-    loadLanguage('BugTracker');
-    $menu_buttons['bugtracker'] = array(
-        'title' => $txt['bugtracker'],
-        'href' => $scripturl . '?action=bugtracker',
-        'show' => allowedTo('bugtracker_view'),
-        'sub_buttons' => array(
-            'bt_admin' => array(
-                'title' => $txt['bt_acp_b'],
-                'href' => $scripturl . '?action=bugtracker;sa=admin',
-                'show' => allowedTo('bugtracker_view') && allowedTo('bugtracker_admin'),
-            ),
-        ),
-    );
+	global $txt, $scripturl;
+        loadLanguage('BugTracker');
+	$menu_buttons['bugtracker'] = array(
+	       'title' => $txt['bugtracker'],
+	       'href' => $scripturl . '?action=bugtracker',
+		'show' => allowedTo('bugtracker_view'),
+		'sub_buttons' => array(
+		),
+	);
+}
+
+function fxt_adminareas(&$areas)
+{
+	/*
+	 *		'maintenance' => array(
+			'title' => $txt['admin_maintenance'],
+			'permission' => array('admin_forum'),
+			'areas' => array(
+				'maintain' => array(
+					'label' => $txt['maintain_title'],
+					'file' => 'ManageMaintenance.php',
+					'icon' => 'maintain.gif',
+					'function' => 'ManageMaintenance',
+					'subsections' => array(
+						'routine' => array($txt['maintain_sub_routine'], 'admin_forum'),
+						'database' => array($txt['maintain_sub_database'], 'admin_forum'),
+						'members' => array($txt['maintain_sub_members'], 'admin_forum'),
+						'topics' => array($txt['maintain_sub_topics'], 'admin_forum'),
+					),
+				),*/
+	
+	global $txt;
+	loadLanguage('BugTracker');
+	
+	$areas['fxtracker'] = array(
+		'title' => $txt['bt_acp_button'],
+		'permission' => array('bt_admin'),
+		'areas' => array(
+			'projects' => array(
+				'label' => $txt['bt_acp_projects'],
+				'file' => 'FXTracker/ACP/ManageProjects.php',
+				'icon' => 'boards.gif',
+				'function' => 'ManageProjectsMain',
+			)
+		)
+	);
 }

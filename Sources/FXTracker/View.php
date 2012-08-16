@@ -28,6 +28,9 @@ function BugTrackerView()
 
 	// Pick our data.
 	$data = $smcFunc['db_fetch_assoc']($request);
+	
+	// And free it.
+	$smcFunc['db_free_result']($request);
 
 	// Are we allowed to view private issues, and is this one of them?
 	if ($data['tracker'] != $context['user']['id'] && (!allowedTo('bugtracker_viewprivate') && $data['private'] == 1))
@@ -37,7 +40,15 @@ function BugTrackerView()
 	loadTemplate('fxt/View');
 
 	// Load the data for the tracker.
-	loadMemberData($data['tracker']);
+	if ($data['tracker'] != 0)
+		loadMemberData($data['tracker']);
+	
+	// Guests need a different trick.
+	else
+		$user_profile[0] = array(
+			'id_member' => 0,
+			'member_name' => $txt['guest'],
+		);
 	
 	// Load every note associated with this entry...
 	$result = $smcFunc['db_query']('', '
@@ -57,7 +68,15 @@ function BugTrackerView()
 	while ($note = $smcFunc['db_fetch_assoc']($result))
 	{
 		// Okay, we're not afraid to load the data of the tracker.
-		loadMemberData($note['authorid']);
+		if ($note['authorid'] != 0)
+			loadMemberData($note['authorid']);
+			
+		// Dealing with a guest ay...
+		else
+			$user_profile[0] = array(
+				'id_member' => 0,
+				'member_name' => $txt['guest'],
+			);
 		
 		// Then put this note together.
 		$notes[] = array(
@@ -67,6 +86,9 @@ function BugTrackerView()
 			'user' => $user_profile[$note['authorid']],
 		);
 	}
+	
+	// And free you are!
+	$smcFunc['db_free_result']($result);
 
 	// Put the data in $context for the template!
 	$context['bugtracker']['entry'] = array(
@@ -99,7 +121,7 @@ function BugTrackerView()
 	);
 
 	// Setup permissions... Not just one of them!
-        $own_any = array('mark', 'mark_new', 'mark_wip', 'mark_done', 'mark_reject', 'mark_attention', 'edit', 'remove', 'remove_note', 'edit_note', 'add_note');
+        $own_any = array('mark', 'mark_new', 'mark_wip', 'mark_done', 'mark_reject', 'mark_attention', 'reply', 'edit', 'remove', 'remove_note', 'edit_note', 'add_note');
         $is_own = $context['user']['id'] == $data['tracker'];
         foreach ($own_any as $perm)
         {
@@ -120,93 +142,41 @@ function BugTrackerView()
 
 function BugTrackerViewProject()
 {
-	global $context, $smcFunc, $txt, $scripturl, $user_profile;
-
-	// Load the project data.
-	$result = $smcFunc['db_query']('', '
-		SELECT
-			id, name
-		FROM {db_prefix}bugtracker_projects
-		WHERE id = {int:project}',
-		array(
-			'project' => (int) $_GET['project'],
-		)
-	);
-
-	// Got something?
-	if ($smcFunc['db_num_rows']($result) == 0 || $smcFunc['db_num_rows']($result) > 1)
+	global $context, $smcFunc, $txt, $scripturl, $user_profile, $sourcedir;
+	
+	// Need Subs-View.php
+	require_once($sourcedir . '/FXTracker/Subs-View.php');
+	require_once($sourcedir . '/Subs-List.php');
+	
+	$context['bugtracker']['projects'] = grabProjects();
+	
+	if (!empty($context['bugtracker']['projects'][$_GET['project']]))
+	    $pdata = $context['bugtracker']['projects'][$_GET['project']];
+	
+	if (empty($pdata))
 		fatal_lang_error('project_no_exist');
-
-	// Fetch it!
-	$pdata = $smcFunc['db_fetch_assoc']($result);
 	
 	// View closed, or rejected, or...both?
 	$viewboth = isset($_GET['viewall']) || (isset($_GET['viewrejected']) && isset($_GET['viewclosed']));
 	$viewclosed = isset($_GET['viewclosed']) || $viewboth;
 	$viewrejected = isset($_GET['viewrejected']) || $viewboth;
 	
-	// Grab the entries.
-	$where = 'project = {int:projectid}';
-	if (!allowedTo('bugtracker_viewprivate'))
-		$where .= ' AND private = 0';
-	
-	$result = $smcFunc['db_query']('', '
-		SELECT
-			id, name, description, type,
-			status, progress, private,
-			attention
-		FROM {db_prefix}bugtracker_entries
-		WHERE ' . $where . '
-		ORDER BY id DESC',
-		array(
-			'projectid' => $pdata['id'],
-		)
-	);
-
-	// If we've got none, too bad. Just start dammit.
-	$closed = 0;
-	$rejected = 0;
-	$entries = array();
-	$attention = array();
-	while ($entry = $smcFunc['db_fetch_assoc']($result))
-	{
-
-		// Okay, if this entry is marked as closed and we aren't viewing closed entries, skip it.
-		if ($entry['status'] == 'done' && !$viewclosed)
-		{
-			$closed++;
-			continue;
-		}
-			
-		if ($entry['status'] == 'reject' && !$viewrejected)
-		{
-			$rejected++;
-			continue;
-		}
-	
-		// Then we're ready for some action.
-		$entries[$entry['id']] = array(
-			'id' => $entry['id'],
-			'name' => $entry['name'],
-			'shortdesc' => shorten_subject($smcFunc['htmlspecialchars']($entry['description']), 50),
-			'type' => $entry['type'],
-			'private' => $entry['private'],
-			'status' => $entry['status'],
-			'attention' => $entry['attention'],
-			'progress' => empty($entry['progress']) ? '0%' : $entry['progress'] . '%',
-		);
-		
-		// Is the status of this entry "attention"? If so, add it to the list of attention requirements thingies!
-		if ($entry['attention'])
-			$attention[] = $entries[$entry['id']];
-	}
+	// For the functions.
+	if ($viewboth)
+		$hideRC = false;
+	elseif ($viewrejected)
+		$hideRC = array('closed');
+	elseif ($viewclosed)
+		$hideRC = array('reject');
+	else
+		$hideRC = array('closed', 'reject');
 
 	// Load the template.
 	loadTemplate('fxt/ViewProject');
 	
-	// How many items are closed?
-	$context['bugtracker']['num_closed'] = $closed;
-	$context['bugtracker']['num_rejected'] = $rejected;
+	// How many items are closed? Going to cheat a bit here ;)
+	$context['bugtracker']['num_closed'] = viewGetEntriesCount(false, 'project = ' . $pdata['id'] . ' AND status = \'done\'');
+	$context['bugtracker']['num_rejected'] = viewGetEntriesCount(false, 'project = ' . $pdata['id'] . ' AND status = \'reject\'');
 	
 	// Viewing a category?
 	$context['bugtracker']['view'] = array(
@@ -217,10 +187,21 @@ function BugTrackerViewProject()
 			'rejected' => $viewboth ? ';viewclosed' : ($viewclosed ? ';viewall' : ($viewrejected ? '' : ';viewrejected')),
 		),
 	);
+	$urlext = '';
+	if ($viewboth)
+		$urlext = ';viewall';
+	elseif ($viewrejected)
+		$urlext = ';viewrejected';
+	elseif ($viewclosed)
+		$urlext = ';viewclosed';
+	
+	$listOptions = createListOptionsNormal($scripturl . '?action=bugtracker;sa=projectindex;project=' . $pdata['id'] . $urlext, 'project = ' . $pdata['id'], $hideRC);
+	createList($listOptions);
+	
+	$listOptions = createListOptionsImportant($scripturl . '?action=bugtracker;sa=projectindex;project=' . $pdata['id'] . $urlext, 'project = ' . $pdata['id']);
+	createList($listOptions);
 
 	// What do we have, from issues and such?
-	$context['bugtracker']['entries'] = $entries;
-	$context['bugtracker']['attention'] = $attention;
 	$context['bugtracker']['project'] = $pdata;
 
 	// Also stuff the linktree.
@@ -241,7 +222,7 @@ function BugTrackerViewProject()
 
 function BugTrackerViewType()
 {
-	global $context, $smcFunc, $txt, $scripturl;
+	global $context, $smcFunc, $txt, $scripturl, $sourcedir;
 
 	// Start by checking if we are grabbing a valid type!
 	$types = array('feature', 'issue');
@@ -251,59 +232,25 @@ function BugTrackerViewType()
 		
 	// Load the template.
 	loadTemplate('fxt/ViewType');
+	
+	// And Subs-View.php
+	require_once($sourcedir . '/FXTracker/Subs-View.php');
+	
+	$context['bugtracker']['projects'] = grabProjects();
+	
+        // We're going to create a list for this.
+        require_once($sourcedir . '/Subs-List.php');
+	$listOptions = createListOptionsNormal($scripturl . '?action=bugtracker;sa=viewtype;type=' . $_GET['type'], 'type = \'' . $_GET['type'] . '\'', false);
 
-	// Okay, then start loading every entry.
-	$private = !allowedTo('bugtracker_viewprivate') ? 'AND private="0"' : '';
-	$result = $smcFunc['db_query']('', '
-		SELECT
-			e.id AS entry_id, e.name AS entry_name, e.description, e.type,
-			e.tracker, e.private, e.startedon, e.project,
-			e.status, e.attention, e.progress,
-			p.id, p.name As project_name
-		FROM {db_prefix}bugtracker_entries AS e
-		INNER JOIN {db_prefix}bugtracker_projects AS p ON (e.project = p.id)
-		WHERE e.type = {string:type}
-		' . $private . '
-		ORDER BY id DESC',
-		array(
-			'type' => $_GET['type'],
-		)
-	);
-
-	// Fetch 'em!
-	$closed = 0;
-	$entries = array();
-	$attention = array();
-	while ($entry = $smcFunc['db_fetch_assoc']($result))
-	{
-		// Then we're ready for some action.
-		$entries[$entry['entry_id']] = array(
-			'id' => $entry['entry_id'],
-			'name' => $entry['entry_name'],
-			'shortdesc' => shorten_subject($smcFunc['htmlspecialchars']($entry['description']), 50),
-			'type' => $entry['type'],
-			'private' => ($entry['private'] == 1 ? true : false),
-			'status' => $entry['status'],
-			'attention' => $entry['attention'],
-			'project' => array(
-				'id' => $entry['id'],
-				'name' => $entry['project_name'],
-			),
-               		'progress' => empty($entry['progress']) ? '0%' : $entry['progress'] . '%',
-		);
-
-		// Is the status of this entry "attention"? If so, add it to the list of attention requirements thingies!
-		if ($entry['attention'])
-			$attention[] = $entries[$entry['entry_id']];
-
-		if ($entry['status'] == 'done')
-			$closed++;
-	}
-
-	// So matey tell me what ya got. Wait no, tell $context!
-	$context['bugtracker']['entries'] = $entries;
-	$context['bugtracker']['attention'] = $attention;
-	$context['bugtracker']['num_closed'] = $closed;
+	// Create the list
+	createList($listOptions);
+	
+	// And 'nother list..
+	$listOptions = createListOptionsImportant($scripturl . '?action=bugtracker;sa=viewtype;type=' . $_GET['type'], 'type = \'' . $_GET['type'] . '\'');
+	
+	// Also create this one.
+	createList($listOptions);
+	
 	$context['bugtracker']['viewtype_type'] = $_GET['type'];
 
 	// Set up the linktree.
@@ -322,7 +269,7 @@ function BugTrackerViewType()
 
 function BugTrackerViewStatus()
 {
-	global $context, $smcFunc, $txt, $scripturl;
+	global $context, $smcFunc, $txt, $scripturl, $sourcedir;
 
 	// Start by checking if we are grabbing a valid type!
 	$types = array('new', 'wip', 'done', 'reject');
@@ -332,59 +279,24 @@ function BugTrackerViewStatus()
 		
 	// Load the template.
 	loadTemplate('fxt/ViewType');
+	
+	// And Subs-View.php
+	require_once($sourcedir . '/FXTracker/Subs-View.php');
+	
+	$context['bugtracker']['projects'] = grabProjects();
+	
+        // We're going to create a list for this.
+        require_once($sourcedir . '/Subs-List.php');
+	$listOptions = createListOptionsNormal($scripturl . '?action=bugtracker;sa=viewstatus;status=' . $_GET['status'], 'status = \'' . $_GET['status'] . '\'', false);
 
-	// Okay, then start loading every entry.
-	$private = !allowedTo('bugtracker_viewprivate') ? 'AND private="0"' : '';
-	$result = $smcFunc['db_query']('', '
-		SELECT
-			e.id AS entry_id, e.name AS entry_name, e.description, e.type,
-			e.tracker, e.private, e.startedon, e.project,
-			e.status, e.attention, e.progress,
-			p.id, p.name As project_name
-		FROM {db_prefix}bugtracker_entries AS e
-		INNER JOIN {db_prefix}bugtracker_projects AS p ON (e.project = p.id)
-		WHERE e.status = {string:status}
-		' . $private . '
-		ORDER BY id DESC',
-		array(
-			'status' => $_GET['status'],
-		)
-	);
+	// Create the list
+	createList($listOptions);
+	
+	// And 'nother list..
+	$listOptions = createListOptionsImportant($scripturl . '?action=bugtracker;sa=viewstatus;status=' . $_GET['status'], 'status = \'' . $_GET['status'] . '\'');
 
-	// Fetch 'em!
-	$closed = 0;
-	$entries = array();
-	$attention = array();
-	while ($entry = $smcFunc['db_fetch_assoc']($result))
-	{
-		// Then we're ready for some action.
-		$entries[$entry['entry_id']] = array(
-			'id' => $entry['entry_id'],
-			'name' => $entry['entry_name'],
-			'shortdesc' => shorten_subject($smcFunc['htmlspecialchars']($entry['description']), 50),
-			'type' => $entry['type'],
-			'private' => ($entry['private'] == 1 ? true : false),
-			'status' => $entry['status'],
-			'attention' => $entry['attention'],
-			'project' => array(
-				'id' => $entry['id'],
-				'name' => $entry['project_name'],
-			),
-               		'progress' => empty($entry['progress']) ? '0%' : $entry['progress'] . '%',
-		);
-
-		// Is the status of this entry "attention"? If so, add it to the list of attention requirements thingies!
-		if ($entry['attention'])
-			$attention[] = $entries[$entry['entry_id']];
-
-		if ($entry['status'] == 'done')
-			$closed++;
-	}
-
-	// So matey tell me what ya got. Wait no, tell $context!
-	$context['bugtracker']['entries'] = $entries;
-	$context['bugtracker']['attention'] = $attention;
-	$context['bugtracker']['num_closed'] = $closed;
+	// Also create this one.
+	createList($listOptions);
 
 	// Set up the linktree.
 	$context['linktree'][] = array(

@@ -5,14 +5,10 @@
 function BugTrackerHome()
 {
 	// Global some stuff
-	global $smcFunc, $context, $user_info, $user_profile, $txt, $sourcedir;
+	global $smcFunc, $context, $user_info, $user_profile, $txt, $sourcedir, $modSettings, $scripturl;
 	
 	// Load our Home template.
 	loadTemplate('fxt/Home');
-	
-	// Load entryfuncs.php
-	include($sourcedir . '/FXTracker/EntryFuncs.php');
-	grabEntries(array('none', 'desc'));
 
 	// Set the page title.
 	$context['page_title'] = $txt['bugtracker_index'];
@@ -91,6 +87,9 @@ function BugTrackerHome()
 		if ($entry['attention'])
 			$context['bugtracker']['attention'][] = $context['bugtracker']['entries'][$entry['id']];
 			
+		if (array_key_exists($entry['project'], $context['bugtracker']['projects']))
+			$context['bugtracker']['entries'][$entry['id']]['project'] = $context['bugtracker']['projects'][$entry['project']];
+			
 		// What kind of entry is this?
 		switch ($entry['type'])
 		{
@@ -116,9 +115,6 @@ function BugTrackerHome()
 				
 				break;
 		}
-		
-		if (array_key_exists($entry['project'], $context['bugtracker']['projects']))
-			$context['bugtracker']['entries'][$entry['id']]['project'] = $context['bugtracker']['projects'][$entry['project']];
 	}
 
 	// Clean up.
@@ -127,6 +123,14 @@ function BugTrackerHome()
 	// Put the last 5 entries of each category in a new array.
 	$context['bugtracker']['latest']['issues'] = $latest_issues;
 	$context['bugtracker']['latest']['features'] = $latest_features;
+	
+        // We're going to create a list for this.
+        require_once($sourcedir . '/Subs-List.php');
+	require_once($sourcedir . '/FXTracker/Subs-View.php');
+	$listOptions = createListOptionsImportant($scripturl . '?action=bugtracker');
+
+	// Create the list
+	createList($listOptions);
 
 	// What's our template, doc?
 	$context['sub_template'] = 'TrackerHome';

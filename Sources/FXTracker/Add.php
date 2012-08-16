@@ -29,6 +29,7 @@ function BugTrackerNewEntry()
 
 	// So we have just one...
 	$project = $smcFunc['db_fetch_assoc']($result);
+	$smcFunc['db_free_result']($result);
 
 	// Validate the stuff.
 	$context['bugtracker']['project'] = array(
@@ -126,6 +127,8 @@ function BugTrackerSubmitNewEntry()
 	// The "real" check ;)
 	if ($smcFunc['db_num_rows']($result) == 0 || $smcFunc['db_num_rows']($result) > 1)
 		fatal_lang_error('project_no_exist');
+		
+	$smcFunc['db_free_result']($result);
 
 	// Preparse the message.
 	preparsecode($smcFunc['htmlspecialchars']($entry['description']));
@@ -154,7 +157,8 @@ function BugTrackerSubmitNewEntry()
 			'project' => 'int',
 			'status' => 'string',
 			'attention' => 'int',
-			'progress' => 'int'
+			'progress' => 'int',
+			'startedon' => 'int'
 		),
 		array(
 			$fentry['title'],
@@ -165,7 +169,8 @@ function BugTrackerSubmitNewEntry()
 			$fentry['project'],
 			$fentry['mark'],
 			$fentry['attention'],
-			$fentry['progress']
+			$fentry['progress'],
+			time()
 		),
 		// No idea why I need this but oh well! :D
 		array()
@@ -203,6 +208,7 @@ function BugTrackerAddNote()
                 
         // Data fetching, please.
         $data = $smcFunc['db_fetch_assoc']($result);
+	$smcFunc['db_free_result']($result);
         
         // Are we, like, allowed to add notes to any entry or just our own?
         if (!allowedTo('bt_add_note_any') && (allowedTo('bt_add_note_own') && $context['user']['id'] != $data['tracker']))
@@ -283,6 +289,7 @@ function BugTrackerAddNote2()
                 
         // Then, fetch the data.
         $data = $smcFunc['db_fetch_assoc']($result);
+	$smcFunc['db_free_result']($result);
         
         // Are we allowed to add notes to any entry or just our own?
         if (!allowedTo('bt_add_note_any') && (allowedTo('bt_add_note_own') && $context['user']['id'] != $data['tracker']))
@@ -319,13 +326,18 @@ function BugTrackerAddNote2()
                 $url1 = $scripturl . '?action=profile;u=' . $context['user']['id'];
                 $url2 = $scripturl . '?action=bugtracker;sa=view;entry=' . $note['id'];
                 $url3 = $url2 . '#note_' . $smcFunc['db_insert_id']('{db_prefix}bugtracker_notes', 'id');
+		
+		if ($context['user']['is_guest'])
+			$text = sprintf($txt['note_pm_message_guest'], $url2, $url3);
+		else
+			$text = sprintf($txt['note_pm_message'], $url1, $context['user']['name'], $url2, $url3);
                 sendpm(
                         array(
                               'bcc' => array(),
                               'to' => array($data['tracker'])
                         ),
                         $txt['note_pm_subject'],
-                        sprintf($txt['note_pm_message'], $url1, $context['user']['name'], $url2, $url3),
+                        $text,
                         false,
                         array(
                               'id' => 0,

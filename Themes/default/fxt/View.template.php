@@ -94,8 +94,13 @@ function template_TrackerView()
 
 					<a href="', $scripturl, '?action=bugtracker;sa=viewtype;type=', $context['bugtracker']['entry']['type'], '">', $txt['bugtracker_' . $context['bugtracker']['entry']['type']], '</a><br />
 
-					<a href="', $scripturl, '?action=profile;u=', $context['bugtracker']['entry']['tracker']['id_member'], '">', $context['bugtracker']['entry']['tracker']['member_name'], '</a> (', empty($context['bugtracker']['entry']['tracker']['member_group']) ? $context['bugtracker']['entry']['tracker']['post_group'] : $context['bugtracker']['entry']['tracker']['member_group'], ')<br />
-
+					';
+	if ($context['bugtracker']['entry']['tracker']['id_member'] == 0)
+		echo $txt['guest'] . '<br />';
+	else
+		echo '<a href="', $scripturl, '?action=profile;u=', $context['bugtracker']['entry']['tracker']['id_member'], '">', $context['bugtracker']['entry']['tracker']['member_name'], '</a> (', empty($context['bugtracker']['entry']['tracker']['member_group']) ? $context['bugtracker']['entry']['tracker']['post_group'] : $context['bugtracker']['entry']['tracker']['member_group'], ')<br />';
+		
+	echo '
 					<a href="', $scripturl, '?action=bugtracker;sa=viewstatus;status=', $context['bugtracker']['entry']['status'], '">', $txt['status_' . $context['bugtracker']['entry']['status']] . '</a>' . ($context['bugtracker']['entry']['attention'] ? ' <strong>(' . $txt['status_attention'] . ')</strong>' : ''), '<br />
 
 					<a href="', $scripturl, '?action=bugtracker;sa=projectindex;project=', $context['bugtracker']['entry']['project']['id'], '">', $context['bugtracker']['entry']['project']['name'], '</a><br />
@@ -225,8 +230,14 @@ function template_TrackerView()
 			
 			// Then show the note itself.
 			echo '
-		<a name="note_', $note['id'], '"></a>
-		', sprintf($txt['note_by'], $note['user']['member_name'], $note['time'], $scripturl . '?action=profile;u=' . $note['user']['id_member']), '</a>
+		<a name="note_', $note['id'], '"></a>';
+		
+		if ($note['user']['id_member'] == 0)
+			echo sprintf($txt['note_by_guest'], $note['time']);
+		else
+			echo sprintf($txt['note_by'], $note['user']['member_name'], $note['time'], $scripturl . '?action=profile;u=' . $note['user']['id_member']);
+			
+		echo '
 		<hr />
 		', $note['text'], '
 	</div>';

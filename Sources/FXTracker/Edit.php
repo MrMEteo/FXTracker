@@ -117,6 +117,7 @@ function BugTrackerSubmitEdit()
 		
 	// What's our tracker?
 	$extra = $smcFunc['db_fetch_assoc']($result);
+	$smcFunc['db_free_result']($result);
 	
 	// Not ours, and we have no permission to edit someone else's entry?
 	if (!allowedTo('bt_edit_any') && (allowedTo('bt_edit_own') && $context['user']['id'] != $extra['tracker']))
@@ -222,6 +223,7 @@ function BugTrackerMarkEntry()
 
 	// Then fetch it.
 	$data = $smcFunc['db_fetch_assoc']($result);
+	$smcFunc['db_free_result']($result);
 
 	// Then, are we allowed to do this kind of stuff?
 	if (allowedTo('bt_mark_any') || (allowedTo('bt_mark_own') && $context['user']['id'] == $data['tracker']))
@@ -298,6 +300,7 @@ function BugTrackerEditNote()
                 
         // Load the note itself
         $data = $smcFunc['db_fetch_assoc']($result);
+	$smcFunc['db_free_result']($result);
         
         // Are we allowed to edit this note?
         if (allowedTo('bt_edit_note_any') || (allowedTo('bt_edit_note_own') && $data['authorid'] == $context['user']['id']))
@@ -388,6 +391,7 @@ function BugTrackerEditNote2()
                 
         // Then grab the note.
         $tnote = $smcFunc['db_fetch_assoc']($result);
+	$smcFunc['db_free_result']($result);
         
         // Not allowed to edit *this* note?
         if (!allowedTo('bt_edit_note_any') && (allowedTo('bt_edit_note_own') && $context['user']['id'] != $tnote['authorid']))

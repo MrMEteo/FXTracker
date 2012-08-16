@@ -27,6 +27,7 @@ function BugTrackerRemoveEntry()
 
 	// Fetch the data.
 	$data = $smcFunc['db_fetch_assoc']($result);
+        $smcFunc['db_free_result']($result);
 
 	// Hmm, okay. Are we allowed to remove this entry?
 	if (allowedTo('bt_remove_any') || (allowedTo('bt_remove_own') && $context['user']['id'] == $data['tracker']))
@@ -88,6 +89,7 @@ function BugTrackerRemoveNote()
                 
         // Check if we can remove it -- wait, we need the data for that.
         $note = $smcFunc['db_fetch_assoc']($result);
+        $smcFunc['db_free_result']($result);        
         
         // Check if we can remove it, now.
         if (allowedTo('bt_remove_note_any') || (allowedTo('bt_remove_note_own') && $context['user']['id'] == $note['authorid']))
