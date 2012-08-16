@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `smf_bugtracker_entries` (
   `type` tinytext NOT NULL,
   `tracker` int(11) NOT NULL,
   `private` tinyint(1) NOT NULL,
-  `startedon` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `startedon` int(11) NOT NULL,
   `project` int(11) NOT NULL,
   `status` mediumtext NOT NULL,
   `attention` tinyint(1) NOT NULL,
@@ -41,17 +41,17 @@ CREATE TABLE IF NOT EXISTS `smf_bugtracker_entries` (
   `in_trash` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=43 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
 
 --
 -- Gegevens worden uitgevoerd voor tabel `smf_bugtracker_entries`
 --
 
 INSERT INTO `smf_bugtracker_entries` (`id`, `name`, `description`, `type`, `tracker`, `private`, `startedon`, `project`, `status`, `attention`, `progress`, `in_trash`) VALUES
-(39, 'An open entry', 'Testing', 'issue', 1, 0, '2012-08-09 23:06:06', 1, 'new', 0, 0, 0),
-(40, 'A closed entry', 'Posting a resolved/closed entry', 'feature', 1, 0, '2012-08-10 09:47:00', 1, 'done', 0, 0, 0),
-(41, 'A rejected entry', 'Noes I''m rejected :(', 'issue', 1, 0, '2012-08-09 19:28:58', 1, 'reject', 0, 0, 0),
-(42, 'Workin'' around', 'Just workin'' around.', 'feature', 1, 0, '2012-08-10 09:47:08', 1, 'wip', 1, 10, 0);
+(1, 'An open entry', 'Testing', 'issue', 1, 0, '2012-08-09 23:06:06', 1, 'new', 0, 0, 0),
+(2, 'A closed entry', 'Posting a resolved/closed entry', 'feature', 1, 0, '2012-08-10 09:47:00', 1, 'done', 0, 0, 0),
+(3, 'A rejected entry', 'Noes I''m rejected :(', 'issue', 1, 0, '2012-08-09 19:28:58', 1, 'reject', 0, 0, 0),
+(4, 'Workin'' around', 'Just workin'' around.', 'feature', 1, 0, '2012-08-10 09:47:08', 1, 'wip', 1, 10, 0);
 
 -- --------------------------------------------------------
 
